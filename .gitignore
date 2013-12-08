@@ -1,0 +1,41 @@
+*~
+core
+
+.svn/
+
+######for eclipse
+#.cproject
+#.project
+#.pydevproject
+
+######for rosbuild
+cmake_install.cmake
+build/
+bin/
+lib/
+devel/
+install/
+msg_gen/
+srv_gen/
+msg/*Feedback.msg
+msg/*Goal.msg
+msg/*Result.msg
+msg/lisp
+__init__.py
+__init__.pyc
+
+######for catkin
+catkin/
+catkin_generated/
+cmake/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake 
+CTestTestfile.cmake
+devel/ 
+Makefile
+test_results/ 
+gtest/
+Testing/ 
+
+
