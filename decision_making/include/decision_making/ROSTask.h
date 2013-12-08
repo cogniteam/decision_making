@@ -102,7 +102,17 @@ private:
 		RosConstraints ros_constraints_##NAME(call_ctx.str()+"/"#NAME, #SCRIPT);
 
 
+class RosEventQueue:public decision_making::EventQueue{
+	ros::Publisher publisher;
+	ros::Subscriber subscriber;
+public:
+	RosEventQueue();
+	RosEventQueue(EventQueue* parent);
+	RosEventQueue(EventQueue* parent, bool isTransit);
 
+	void onNewEvent(const std_msgs::String::ConstPtr& msg);
+	virtual void riseEvent(const decision_making::Event& e);
+};
 
 
 

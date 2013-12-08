@@ -307,3 +307,27 @@ std::string RosConstraints::preproc(std::string txt)const{
 	}
 	return result.str();
 }
+
+RosEventQueue::RosEventQueue():decision_making::EventQueue(){
+	publisher = ros::NodeHandle().advertise<std_msgs::String>("/decision_making/events", 100);
+	{ros::Rate sl(1); sl.sleep();}
+	subscriber= ros::NodeHandle().subscribe<std_msgs::String>("/decision_making/events", 100, &RosEventQueue::onNewEvent, this);
+	{ros::Rate sl(1); sl.sleep();}
+}
+RosEventQueue::RosEventQueue(EventQueue* parent):decision_making::EventQueue(parent){
+}
+RosEventQueue::RosEventQueue(EventQueue* parent, bool isTransit):decision_making::EventQueue(parent,isTransit){
+}
+
+void RosEventQueue::onNewEvent(const std_msgs::String::ConstPtr& msg){
+	//cout<<"onNewEvent: "<<msg->data<<endl;
+	decision_making::Event e(msg->data);
+	decision_making::EventQueue::riseEvent(e);
+}
+void RosEventQueue::riseEvent(const decision_making::Event& e){
+	std_msgs::String::Ptr msg(new std_msgs::String());
+	msg->data = e._name;
+	publisher.publish(msg);
+}
+
+

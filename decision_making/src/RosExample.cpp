@@ -21,7 +21,11 @@ using namespace std;
 
 using namespace decision_making;
 
-EventQueue mainEventQueue;
+EventQueue* mainEventQueue;
+struct RosEventQueueAuto{
+	RosEventQueueAuto(){mainEventQueue=new RosEventQueue();}
+	~RosEventQueueAuto(){delete mainEventQueue;}
+};
 
 //#define X(x) x
 //#define PAUSE boost::this_thread::sleep(boost::posix_time::seconds(1.3));
@@ -60,6 +64,7 @@ FSM(RosTest)
 			FSM_TRANSITIONS
 			{
 				FSM_PRINT_EVENT;
+				FSM_ON_EVENT(/GO, FSM_RISE(GoToStop));
 				FSM_ON_EVENT(/GO, FSM_NEXT(stop));
 			}
 		}
@@ -68,7 +73,8 @@ FSM(RosTest)
 			FSM_TRANSITIONS
 			{
 				FSM_PRINT_EVENT;
-				FSM_ON_EVENT(/GO, FSM_NEXT(run_task));
+				FSM_ON_EVENT(/GO, FSM_RISE(GoToRun));
+				FSM_ON_EVENT(GoToRun, FSM_NEXT(run_task));
 			}
 		}
 	}
@@ -76,13 +82,13 @@ FSM(RosTest)
 }
 
 void run_fsm(){
-	FsmRosTest(0, &mainEventQueue);
+	FsmRosTest(0, mainEventQueue);
 }
 
 
 
 void run_bt(){
-	BT_ROOT_BGN(RosTest, mainEventQueue)
+	BT_ROOT_BGN(RosTest, *mainEventQueue)
 	{
 		BT_CALL_TASK(MYTASK);
 	}
@@ -103,10 +109,10 @@ void EVENTS_GENERATOR(){
 		Event t = spec[i];
 		if(t == "NOTHING"){ i=1; t=spec[0]; }else i++;
 		cout << endl << t<<" -> ";
-		mainEventQueue.riseEvent(t);
+		mainEventQueue->riseEvent(t);
 		boost::this_thread::sleep(boost::posix_time::seconds(1));
 	}
-	mainEventQueue.close();
+	mainEventQueue->close();
 }
 
 TaskResult tst_mytask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
@@ -120,6 +126,7 @@ TaskResult tst_mytask(std::string task_address, const FSMCallContext& call_ctx, 
 int main(int a, char** aa){
 
 	ros::init(a, aa, "RosExample");
+	RosEventQueueAuto rosEventQueue;
 	ros_decision_making_init(a, aa);
 
 	cout<<"Path: "<<boost::filesystem::path(aa[0])<<endl;
@@ -135,6 +142,7 @@ int main(int a, char** aa){
 	threads.add_thread(new boost::thread(boost::bind(&run_fsm)));
 	threads.add_thread(new boost::thread(boost::bind(&EVENTS_GENERATOR)));
 
+	ros::spin();
 	threads.join_all();
 
 

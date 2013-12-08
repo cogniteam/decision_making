@@ -95,7 +95,7 @@ public:
 	EventQueue():isTransit(false),events_system_stop(false),parent(NULL){
 
 	}
-	~EventQueue(){
+	virtual ~EventQueue(){
 		if(parent)
 			parent->remove(this);
 		{
@@ -107,7 +107,7 @@ public:
 		}
 	}
 
-	void riseEvent(const Event& e){
+	virtual void riseEvent(const Event& e){
 		if(parent) parent->riseEvent(e);
 		else addEvent(e);
 	}
