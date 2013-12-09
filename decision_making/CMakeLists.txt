@@ -156,18 +156,10 @@ decision_making_parsing(
 	src/RosExample.cpp
 	src/BTExample.cpp
 	src/ROSTask.cpp
-# 	src/multifiles/custom_decision_making.h
-# 	src/multifiles/BT_BT1.h
-# 	src/multifiles/custom_task.h
-# 	src/multifiles/main_include.h
-# 	src/multifiles/FSM_TEST1.h
-# 	src/multifiles/HybridExample.cpp
-# 	src/multifiles/FSM_TEST.h
 	src/FSMExample.cpp
 	src/HybridExample.cpp
 )  
 
-   
     
 #=======================================================================
 #############

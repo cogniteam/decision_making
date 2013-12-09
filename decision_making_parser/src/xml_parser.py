@@ -44,7 +44,7 @@ class NodeShape:
 		#node.set_penwidth(self.npenwidth)
 
 def graph_gen_nodes(xml, node, graph, elem, ids):
-	print 'proc',node.tag, node.attrib['name'] if 'name' in node.attrib else ""
+	#print 'proc',node.tag, node.attrib['name'] if 'name' in node.attrib else ""
 	if node.tag in ['scxml']:
 		for chnode in node:
 			graph_gen_nodes(xml, chnode, graph, elem, ids)
@@ -59,7 +59,7 @@ def graph_gen_nodes(xml, node, graph, elem, ids):
 			has_init_state = 'initialstate' in node.attrib
 			lbl = node.attrib["name"]
 			if has_init_state : lbl = 'FSM['+lbl+']'
-			gr_cluster=pydot.Cluster(ids[node.attrib["id"]],label=lbl)
+			gr_cluster=pydot.Cluster(ids[node.attrib["id"]],label=lbl, URL=node.attrib["id"])
 			elem.add_subgraph(gr_cluster)
 			if has_init_state:
 				gr_st_node = pydot.Node(ids[node.attrib["id"]]+"start", shape="point")
@@ -84,7 +84,7 @@ def graph_gen_nodes(xml, node, graph, elem, ids):
 			for chnode in node.findall('plan'):
 				graph_gen_nodes(xml, chnode, graph, elem, ids)
 		else:
-			gr_cluster=pydot.Cluster(ids[node.attrib["id"]],label=node.attrib["name"])
+			gr_cluster=pydot.Cluster(ids[node.attrib["id"]],label=node.attrib["name"], URL=node.attrib["id"])
 			elem.add_subgraph(gr_cluster)
 			for chnode in node.findall('scxml'):
 				graph_gen_nodes(xml, chnode, graph, gr_cluster, ids)
@@ -105,7 +105,7 @@ def find_state(fsm, state_id):
 	return None
 	
 def graph_gen_edges(xml, node, graph, elem, ids, fsm=None):
-	print 'proc-edge',node.tag, node.attrib['name'] if 'name' in node.attrib else ""
+	#print 'proc-edge',node.tag, node.attrib['name'] if 'name' in node.attrib else ""
 	if node.tag in ['scxml']:
 		for chnode in node:
 			graph_gen_edges(xml, chnode, graph, elem, ids, node)
@@ -203,7 +203,8 @@ if __name__ == '__main__':
 			xml = ET.parse(fileXML).getroot()
 			graph = pydot.Dot(graph_type='digraph', compound='true')
 			map_ids = map_all_ids(xml)
-			for k,v in map_ids.items(): print k,":",v
+			if options.verbose is ():
+				for k,v in map_ids.items(): print k,":",v
 			graph_gen_nodes(xml, xml, graph, graph, map_ids)
 			graph_gen_edges(xml, xml, graph, graph, map_ids)
 			graph.write_raw(args[1] + os.sep + fileName[:-len("XXxml")] + "dot")

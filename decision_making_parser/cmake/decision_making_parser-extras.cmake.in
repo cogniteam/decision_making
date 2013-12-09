@@ -35,7 +35,7 @@ macro(decision_making_parsing _SRC_FILE_LIST)
 		
 		#message(" -- Source cpp files : ${CPPFILES}")
 		foreach( f ${CPPFILES} )
-			LIST( APPEND _CPPFILES ${f} ":")
+			LIST( APPEND _CPPFILES ${CMAKE_CURRENT_SOURCE_DIR}/${f} ":")
 		endforeach()#( f ${CPPFILES} )
 		message("  -- source files : ${CPPFILES}")
 
