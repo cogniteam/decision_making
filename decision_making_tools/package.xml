@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>decision_making_tools</name>
+  <version>0.0.0</version>
+  <description>decision_making_tools</description>
+  <url>http://www.ros.org/wiki/decision_making_tools</url>
+  <maintainer email="dan@cogniteam.com">Dan</maintainer>
+  <author email="dan@cogniteam.com">Dan</author>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <run_depend>decision_making</run_depend>
+  <run_depend>decision_making_examples</run_depend>
+  <run_depend>decision_making_parser</run_depend>
+
+  <export>
+  	<metapackage/>
+  </export>
+  
+</package>
