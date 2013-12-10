@@ -20,13 +20,17 @@
 namespace decision_making{
 
 struct ScoppedThreads{
+	typedef boost::shared_ptr<EventQueue> EventQueuePtr;
+	typedef boost::shared_ptr<CallContext> CallContextPtr;
 	boost::thread_group threads;
-	vector<EventQueue*> events;
+	vector<EventQueuePtr> events;
+	vector<CallContextPtr> contexts;
 	void add(boost::thread* thread){threads.add_thread(thread);};
-	void add(EventQueue* event){ events.push_back(event); }
+	void add(EventQueuePtr event){ events.push_back(event); }
+	void add(CallContextPtr event){ contexts.push_back(event); }
 
 	void stopEvents(){
-		BOOST_FOREACH(EventQueue* e, events){
+		BOOST_FOREACH(EventQueuePtr e, events){
 			e->close();
 		}
 	}
@@ -39,16 +43,17 @@ struct ScoppedThreads{
 
 
 #define FSM_HEADER(NAME) \
-	decision_making::TaskResult Fsm##NAME(const decision_making::FSMCallContext*, decision_making::EventQueue*, std::string);
+	decision_making::TaskResult Fsm##NAME(const decision_making::CallContext*, decision_making::EventQueue*, std::string);\
+	decision_making::TaskResult Fsm##NAME(const decision_making::CallContext* p, decision_making::EventQueue* q);
 
 #define FSM(NAME) \
 	FSM_HEADER(NAME)\
-	decision_making::TaskResult Fsm##NAME(const decision_making::FSMCallContext* p, decision_making::EventQueue* q){return Fsm##NAME(p,q,#NAME);}\
-	decision_making::TaskResult Fsm##NAME(const decision_making::FSMCallContext* parent_call_ctx, decision_making::EventQueue* parent_event_queue, std::string fsm_name)
+	decision_making::TaskResult Fsm##NAME(const decision_making::CallContext* p, decision_making::EventQueue* q){return Fsm##NAME(p,q,#NAME);}\
+	decision_making::TaskResult Fsm##NAME(const decision_making::CallContext* parent_call_ctx, decision_making::EventQueue* parent_event_queue, std::string fsm_name)
 
 #define FSM_STATES enum STATES
 
-#define __DEFCALLCONTEXT decision_making::FSMCallContext call_ctx(parent_call_ctx?decision_making::FSMCallContext(*parent_call_ctx, fsm_name):decision_making::FSMCallContext(fsm_name));
+#define __DEFCALLCONTEXT decision_making::CallContext call_ctx(parent_call_ctx?decision_making::CallContext(*parent_call_ctx, fsm_name):decision_making::CallContext(fsm_name));
 #define __DEFEVENTQUEUE decision_making::EventQueue* events_queue(parent_event_queue);
 #define FSM_START(STATE) \
 		state ( STATE ); \
@@ -59,7 +64,7 @@ struct ScoppedThreads{
 
 #define FSM_BGN \
 		bool fsm_stop = false; \
-		while(not fsm_stop and not events_queue->isTerminated()){ \
+		while(not fsm_stop and not events_queue->isTerminated() DM_SYSTEM_STOP){ \
 			switch(state){ { {
 
 #define FSM_END \
@@ -76,8 +81,8 @@ struct ScoppedThreads{
 #define __ENDOFSTATE \
 		DMDEBUG( struct _STATE_FINISHER_PRINT{std::string n;_STATE_FINISHER_PRINT( std::string n): n(n){}~_STATE_FINISHER_PRINT(){DMDEBUG( cout<<"}"<<n<<" "; )} void r(){}}_ep(outname);_ep.r(); )\
 		struct _STATE_FINISHER{\
-			std::string state_name; decision_making::FSMCallContext& ctx; decision_making::EventQueue& queue;\
-			_STATE_FINISHER(std::string state_name, decision_making::FSMCallContext& ctx, decision_making::EventQueue& queue): state_name(state_name),ctx(ctx),queue(queue){}\
+			std::string state_name; decision_making::CallContext& ctx; decision_making::EventQueue& queue;\
+			_STATE_FINISHER(std::string state_name, decision_making::CallContext& ctx, decision_making::EventQueue& queue): state_name(state_name),ctx(ctx),queue(queue){}\
 			~_STATE_FINISHER(){\
 				ON_FSM_STATE_END(state_name, ctx, queue);\
 			} void r(){}\
@@ -86,7 +91,7 @@ struct ScoppedThreads{
 #define FSM_STATE(X)  \
 			}}}break; \
 			case X: { \
-				ScoppedThreads SUBMACHINESTHREADS; \
+				decision_making::ScoppedThreads SUBMACHINESTHREADS; \
 				__STARTOFSTATE(X)  __ENDOFSTATE
 
 #define FSM_NEXT(STATE) \
@@ -108,28 +113,32 @@ struct ScoppedThreads{
 			DMDEBUG( cout<<" RISE("<<fsm_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
 			events_queue->riseEvent(decision_making::Event(#EVENT, call_ctx));
 
-#define __DEFSUBEVENTQUEUE(TASK) decision_making::EventQueue events_queu##TASK(events_queue);
-#define __DEFSUBCTEXT(TASK) decision_making::FSMCallContext call_ctx##TASK(call_ctx, #TASK);
-
+#define __DEFSUBEVENTQUEUE(TASK) decision_making::ScoppedThreads::EventQueuePtr events_queu##TASK( new decision_making::EventQueue(events_queue) );
+#define __DEFSUBCTEXT(TASK) decision_making::ScoppedThreads::CallContextPtr call_ctx##TASK( new decision_making::CallContext(call_ctx, #TASK) );
+#define __SHR_TO_REF(X) (*(X.get()))
 #define FSM_CALL_TASK(TASK) \
 			__DEFSUBEVENTQUEUE(TASK) __DEFSUBCTEXT(TASK) \
-			SUBMACHINESTHREADS.add(&events_queu##TASK); \
+			SUBMACHINESTHREADS.add(events_queu##TASK); \
+			SUBMACHINESTHREADS.add(call_ctx##TASK); \
 			SUBMACHINESTHREADS.add(\
-				new boost::thread(  CALL_REMOTE(TASK, boost::ref(call_ctx##TASK), boost::ref(events_queu##TASK))  ));
+				new boost::thread(  CALL_REMOTE(TASK, boost::ref(__SHR_TO_REF(call_ctx##TASK)), boost::ref(__SHR_TO_REF(events_queu##TASK)))  ));
 
 #define FSM_CALL_FSM(NAME) \
 			__DEFSUBEVENTQUEUE(NAME) \
-			SUBMACHINESTHREADS.add(&events_queu##NAME); \
+			SUBMACHINESTHREADS.add(events_queu##NAME); \
 			SUBMACHINESTHREADS.add(\
-					new boost::thread(boost::bind(&Fsm##NAME, &call_ctx, &events_queu##NAME)  ));
+					new boost::thread(boost::bind(&Fsm##NAME, &call_ctx, events_queu##NAME.get())  ));
 
 
 #define FSM_CALL_BT(NAME) \
 			__DEFSUBEVENTQUEUE(NAME) __DEFSUBCTEXT(NAME) \
-			SUBMACHINESTHREADS.add(&events_queu##NAME); \
-			__BT_CREATE_BT_CALL_FUNCTION(NAME)\
+			SUBMACHINESTHREADS.add(events_queu##NAME); \
+			SUBMACHINESTHREADS.add(call_ctx##NAME); \
+			decision_making::EventQueue& __t_events_queu##NAME = __SHR_TO_REF(events_queu##NAME);\
+			decision_making::CallContext& __t_call_ctx##NAME = __SHR_TO_REF(call_ctx##NAME);\
+			__BT_CREATE_BT_CALL_FUNCTION(NAME, __t_call_ctx##NAME, __t_events_queu##NAME)\
 			SUBMACHINESTHREADS.add(\
-				__CALL_BT_FUNCTION(NAME, boost::ref(call_ctx##NAME), boost::ref(events_queu##NAME))  \
+				__CALL_BT_FUNCTION(NAME, boost::ref(__t_call_ctx##NAME), boost::ref(__t_events_queu##NAME))  \
 			);
 
 
@@ -139,7 +148,7 @@ struct ScoppedThreads{
 			fsm_result = RESULT; \
 			break;
 
-#define __CLEAN_THREAD_AND_EVENTS ScoppedThreads::Cleaner SUBMACHINESTHREADSCLEANER(SUBMACHINESTHREADS);
+#define __CLEAN_THREAD_AND_EVENTS decision_making::ScoppedThreads::Cleaner SUBMACHINESTHREADSCLEANER(SUBMACHINESTHREADS);
 #define FSM_TRANSITIONS  __CLEAN_THREAD_AND_EVENTS {Event event; while((event=events_queue->waitEvent())==true){
 
 #define FSM_DROP_EVENTS events_queue->drop_all();

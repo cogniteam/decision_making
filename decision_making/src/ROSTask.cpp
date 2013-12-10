@@ -11,7 +11,7 @@
 
 using namespace std;
 using namespace robot_task;
-using namespace decision_making;
+namespace decision_making{
 
 typedef actionlib::SimpleActionClient<RobotTaskAction> Client;
 
@@ -24,7 +24,7 @@ const double WAIT_RESULT_DURATION = 1.0;
 			return TaskResult::TERMINATED();\
 		}
 
-TaskResult callTask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& events){
+TaskResult callTask(std::string task_address, const CallContext& call_ctx, EventQueue& events){
 	DMDEBUG( cout<<" TASK("<<task_address<<":CALL) " ;)
 
 	string task_name, task_params;
@@ -231,18 +231,6 @@ private:
 	}
 };
 
-void ros_decision_making_init(int &argc, char **argv){
-	RosNodeInformation& info = RosNodeInformation::get();
-	info.node_name = ros::this_node::getName();
-	info.node_namespace = ros::this_node::getNamespace();
-	info.executable_path = boost::filesystem::path(argv[0]).string();
-	info.executable_dir = boost::filesystem::current_path().string();
-	RosDiagnostic::get();
-	RosConstraints::getAdder();
-	RosConstraints::getRemover();
-	ros::Rate sl(1); sl.sleep();
-}
-
 ON_FUNCTION(on_fsm_start){
 	//cout<<"[on_fsm_start]"<<call_ctx.str()<<endl;
 	RosDiagnostic::get().publish(call_ctx.str(), type, "started", str(result));
@@ -310,9 +298,9 @@ std::string RosConstraints::preproc(std::string txt)const{
 
 RosEventQueue::RosEventQueue():decision_making::EventQueue(){
 	publisher = ros::NodeHandle().advertise<std_msgs::String>("/decision_making/events", 100);
-	{ros::Rate sl(1); sl.sleep();}
+	{boost::this_thread::sleep(boost::posix_time::seconds(1.0));}
 	subscriber= ros::NodeHandle().subscribe<std_msgs::String>("/decision_making/events", 100, &RosEventQueue::onNewEvent, this);
-	{ros::Rate sl(1); sl.sleep();}
+	{boost::this_thread::sleep(boost::posix_time::seconds(1.0));}
 }
 RosEventQueue::RosEventQueue(EventQueue* parent):decision_making::EventQueue(parent){
 }
@@ -320,7 +308,7 @@ RosEventQueue::RosEventQueue(EventQueue* parent, bool isTransit):decision_making
 }
 
 void RosEventQueue::onNewEvent(const std_msgs::String::ConstPtr& msg){
-	//cout<<"onNewEvent: "<<msg->data<<endl;
+	cout<<"RosEventQueue:onNewEvent: "<<msg->data<<endl;
 	decision_making::Event e(msg->data);
 	decision_making::EventQueue::riseEvent(e);
 }
@@ -329,5 +317,23 @@ void RosEventQueue::riseEvent(const decision_making::Event& e){
 	msg->data = e._name;
 	publisher.publish(msg);
 }
+
+
+}
+
+
+void ros_decision_making_init(int &argc, char **argv){
+	using namespace decision_making;
+	RosNodeInformation& info = RosNodeInformation::get();
+	info.node_name = ros::this_node::getName();
+	info.node_namespace = ros::this_node::getNamespace();
+	info.executable_path = boost::filesystem::path(argv[0]).string();
+	info.executable_dir = boost::filesystem::current_path().string();
+	RosDiagnostic::get();
+	RosConstraints::getAdder();
+	RosConstraints::getRemover();
+	ros::Rate sl(1); sl.sleep();
+}
+
 
 

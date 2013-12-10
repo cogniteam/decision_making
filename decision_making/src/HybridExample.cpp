@@ -50,7 +50,7 @@ void EVENTS_GENERATOR(){
 //==================== CONNECTION TO REAL TASKS ==============================
 
 
-TaskResult callTask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
+TaskResult callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
 	DMDEBUG( cout<<" TASK("<<task_address<<":CALL) " ;)
 	while(true)
 	{
@@ -121,7 +121,7 @@ BT_END(BT1);
 
 
 //struct _bt_function_struct{
-//TaskResult _bt_function(std::string task_address, FSMCallContext& call_ctx, EventQueue& queue){
+//TaskResult _bt_function(std::string task_address, CallContext& call_ctx, EventQueue& queue){
 //	BTContext _tmp_context;
 //	BT_ROOT_BGN(bt_from_fsm, __tmp_event_queue()){
 //		call_ctx.pop();

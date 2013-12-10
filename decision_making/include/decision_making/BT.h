@@ -35,10 +35,10 @@ struct BTNode{
 	bool finished;
 	boost::condition_variable on_child_terminated;
 	TaskResult bt_node_return_value;
-	FSMCallContext call_ctx;
+	CallContext call_ctx;
 	EventQueue events;
 	string node_name;
-	#define BTNodeContructorParams_DEF BTNodeTYPE t, string node_name, const FSMCallContext& parent_call_ctx, EventQueue& events
+	#define BTNodeContructorParams_DEF BTNodeTYPE t, string node_name, const CallContext& parent_call_ctx, EventQueue& events
 	#define BTNodeContructorParams_USE parent_call_ctx, events
 	BTNode(BTNodeContructorParams_DEF):
 		type(t),
@@ -180,8 +180,8 @@ typedef BTNode CurrentNodeType;
 	struct BT_NODE_TYPE(NAME):public BTNode\
 	{ \
 		BTContext _tmp_context; BTContext& context;\
-		BT_NODE_TYPE(NAME)():BTNode(BT_SEQ, #NAME, decision_making::FSMCallContext(), EVENTS),_tmp_context(),context(_tmp_context){}\
-		BT_NODE_TYPE(NAME)(BTContext& ctx, const decision_making::FSMCallContext& calls, decision_making::EventQueue& events):BTNode(BT_SEQ, #NAME, calls, events),context(ctx){}\
+		BT_NODE_TYPE(NAME)():BTNode(BT_SEQ, #NAME, decision_making::CallContext(), EVENTS),_tmp_context(),context(_tmp_context){}\
+		BT_NODE_TYPE(NAME)(BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events):BTNode(BT_SEQ, #NAME, calls, events),context(ctx){}\
 		TaskResult run(){\
 			DMDEBUG( cout<<" [BT:" #NAME " MAIN" "]{ "; ) \
 			ON_BT_NODE_START(#NAME, "ROOT", call_ctx, events);\
@@ -192,7 +192,7 @@ typedef BTNode CurrentNodeType;
 	struct BT_NODE_TYPE(NAME):public BTNode\
 	{ \
 		BTContext& context;\
-		BT_NODE_TYPE(NAME)(BTNode* p, BTContext& ctx, const decision_making::FSMCallContext& calls, decision_making::EventQueue& events):BTNode(TYPE, #NAME, calls, events),context(ctx){\
+		BT_NODE_TYPE(NAME)(BTNode* p, BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events):BTNode(TYPE, #NAME, calls, events),context(ctx){\
 			p->tasks.push_back(this);\
 		}\
 		TaskResult run()\
@@ -226,9 +226,9 @@ typedef BTNode CurrentNodeType;
 #define BT_TASK_END(NAME) __BT_END_TASK(NAME)
 
 #define __BTDEFSUBEVENTQUEUE(NAME) decision_making::EventQueue events_##NAME(&events);
-//#define __BTDEFSUBCTEXT(NAME) FSMCallContext call_ctx_##NAME(call_ctx, #NAME);
+//#define __BTDEFSUBCTEXT(NAME) CallContext call_ctx_##NAME(call_ctx, #NAME);
 //#define __BTDEFSUBEVENTQUEUE(NAME) EventQueue& events_##NAME(events);
-#define __BTDEFSUBCTEXT(NAME) decision_making::FSMCallContext& call_ctx_##NAME(call_ctx);
+#define __BTDEFSUBCTEXT(NAME) decision_making::CallContext& call_ctx_##NAME(call_ctx);
 
 #define BT_CALL_TASK(NAME)\
 					__BT_NODE_BGN(BT_TASK, NAME, "")\
@@ -286,9 +286,9 @@ typedef BTNode CurrentNodeType;
 
 struct BTCaller{
 	std::string task_address;
-	decision_making::FSMCallContext& call_ctx;
+	decision_making::CallContext& call_ctx;
 	decision_making::EventQueue& queue;
-	BTCaller(std::string task_address, decision_making::FSMCallContext& call_ctx, decision_making::EventQueue& queue):
+	BTCaller(std::string task_address, decision_making::CallContext& call_ctx, decision_making::EventQueue& queue):
 					task_address(task_address), call_ctx(call_ctx), queue(queue)
 	{}
 	virtual ~BTCaller(){}
@@ -296,9 +296,9 @@ struct BTCaller{
 	boost::thread* getThread(){ return new boost::thread( boost::bind( &BTCaller::_bt_function,  this )); }
 };
 
-#define __BT_CREATE_BT_CALL_FUNCTION(BTNAME)\
+#define __BT_CREATE_BT_CALL_FUNCTION(BTNAME, P_call_ctx, P_events_queu)\
 				struct _bt_function_struct##BTNAME: public decision_making::BTCaller{\
-					_bt_function_structBT1(std::string task_address, decision_making::FSMCallContext& call_ctx, decision_making::EventQueue& queue):decision_making::BTCaller(task_address,call_ctx,queue){}\
+					_bt_function_structBT1(std::string task_address, decision_making::CallContext& call_ctx, decision_making::EventQueue& queue):decision_making::BTCaller(task_address,call_ctx,queue){}\
 					decision_making::TaskResult _bt_function(){\
 						BTContext _tmp_context;\
 						BT_ROOT_BGN(bt_from_fsm, __tmp_event_queue()){\
@@ -326,7 +326,7 @@ struct BTCaller{
 						DMDEBUG( cout<<"(fsm from function finished)"; )\
 						return res;\
 					}\
-				}  _bt_function_struct_instanceBT1(#BTNAME, call_ctx##BTNAME, events_queu##BTNAME);
+				}  _bt_function_struct_instanceBT1(#BTNAME, P_call_ctx, P_events_queu);
 
 #define __CALL_BT_FUNCTION(NAME, CALLS, EVENTS) _bt_function_struct_instance##BT1.getThread()
 

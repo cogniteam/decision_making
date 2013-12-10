@@ -17,7 +17,7 @@ using namespace decision_making;
 EventQueue mainEventQueue;
 
 
-void callTask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
+void callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
 	cout<<" TASK("<<task_address<<":CALL) ";
 	while(true)
 	{
