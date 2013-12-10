@@ -125,6 +125,7 @@ target_link_libraries(mult_hyb_example ${catkin_LIBRARIES} )
 #===================== ROS =============================================
 
 add_library(decision_making_ros src/ROSTask.cpp)
+add_dependencies(decision_making_ros robot_task_gencpp)
 target_link_libraries(decision_making_ros ${catkin_LIBRARIES} )
 
 add_executable(ros_example src/RosExample.cpp)
