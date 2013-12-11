@@ -14,6 +14,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/foreach.hpp>
+#include <boost/regex.hpp>
 
 namespace decision_making{
 	using namespace std;
@@ -81,7 +82,13 @@ struct Event{
 	string _name;
 	Event(string lname, const CallContext& ctx){
 		if(lname.size()==0){ _name=lname; return; }
-		if(lname[0]=='/'){ _name = lname; return; }
+		if(lname[0]=='/'){ _name=lname; return; }
+		if(lname[0]=='@' and lname.size()<3){ _name=ctx.str(); return; }
+		if(lname[0]=='@'){
+			if(lname[1]=='/') _name = lname;
+			else _name = '@'+ctx.str()+"/"+lname.substr(1);
+			return;
+		}
 		_name = ctx.str()+"/"+lname;
 	}
 	Event(string lname = ""){
@@ -105,9 +112,20 @@ struct Event{
 	}
 	bool isUndefined()const{ return _name.size()==0; }
 	bool isDefined()const{ return not isUndefined(); }
-	bool operator==(const Event& e){ return _name==e._name; }
-	bool operator!=(const Event& e){ return _name!=e._name; }
+	bool isRegEx()const{ return _name.size()>0 and _name[0]=='@'; }
+	bool operator==(const Event& e){
+		if(e.isRegEx() and !isRegEx()) return e.regex(_name);
+		if(isRegEx() and !e.isRegEx()) return regex(e._name);
+		return _name==e._name;
+	}
+	bool operator!=(const Event& e){ return !(e==(*this)); }
 	operator bool()const{ return isDefined(); }
+
+	bool regex(std::string text)const{
+		if(isRegEx()==false) return _name==text;
+		boost::regex e(_name.substr(1));
+		return regex_match(text, e);
+	}
 };
 inline std::ostream& operator<<(std::ostream& o, Event t){
 	return o<<"E["<<t.name()<<']';

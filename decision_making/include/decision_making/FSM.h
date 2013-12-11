@@ -135,16 +135,19 @@ public:
 				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(#EVENT,call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
+#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,call_ctx))
+
 #define FSM_ON_CONDITION(COND, DO) \
 			if(COND){ \
 				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(#COND,call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
 
-
 #define FSM_RISE(EVENT) \
 			DMDEBUG( cout<<" RISE("<<fsm_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
 			events_queue->riseEvent(decision_making::Event(#EVENT, call_ctx));
+
+#define FSM_EVENTS_DROP events_queue->drop_all();
 
 #define __DEFSUBEVENTQUEUE(TASK) decision_making::ScoppedThreads::EventQueuePtr events_queu##TASK( new decision_making::EventQueue(events_queue) );
 #define __DEFSUBCTEXT(TASK) decision_making::ScoppedThreads::CallContextPtr call_ctx##TASK( new decision_making::CallContext(call_ctx, #TASK) );

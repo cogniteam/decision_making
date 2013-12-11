@@ -177,7 +177,7 @@ public:
 		{
 			boost::mutex::scoped_lock lq(mtx_queue);
 			DiagnosticMessage msg ( name, type, status, info );
-			cout<<msg.str();
+			//cout<<msg.str();
 			queue.push_back(msg);
 		}
 		update();
