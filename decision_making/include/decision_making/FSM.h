@@ -19,11 +19,16 @@
 
 namespace decision_making{
 
-class ScoppedThreadsOnExit;
+class ___ABS__ScoppedThreadsOnExit{
+public:
+    virtual ~___ABS__ScoppedThreadsOnExit(){}
+    virtual void exit()=0;
+    virtual boost::thread_group& getThreads()=0;
+};
 struct ScoppedThreads{
 	typedef boost::shared_ptr<EventQueue> EventQueuePtr;
 	typedef boost::shared_ptr<CallContext> CallContextPtr;
-	typedef boost::shared_ptr<ScoppedThreadsOnExit> ScoppedThreadsOnExitPtr;
+	typedef boost::shared_ptr<___ABS__ScoppedThreadsOnExit> ScoppedThreadsOnExitPtr;
 	boost::thread_group threads;
 	vector<EventQueuePtr> events;
 	vector<CallContextPtr> contexts;
@@ -48,9 +53,15 @@ struct ScoppedThreads{
 
 	vector<ScoppedThreadsOnExitPtr> on_exits;
 	void add(ScoppedThreadsOnExitPtr exit){ on_exits.push_back(exit); }
-	void runOnExit();
+	//void runOnExit();
+	void runOnExit(){
+	    BOOST_FOREACH(ScoppedThreadsOnExitPtr e, on_exits){
+	        e->exit();
+	        e->getThreads().join_all();
+	    }
+	}
 };
-class ScoppedThreadsOnExit{
+class ScoppedThreadsOnExit:public ___ABS__ScoppedThreadsOnExit{
 public:
 	EventQueue* events_queue;
 	CallContext& call_ctx;
@@ -59,14 +70,9 @@ public:
 		events_queue(events_queue), call_ctx(call_ctx)
 	{}
 	virtual ~ScoppedThreadsOnExit(){}
-	virtual void exit()=0;
+	//virtual void exit()=0;
+	virtual boost::thread_group& getThreads(){ return SUBMACHINESTHREADS.threads; }
 };
-void ScoppedThreads::runOnExit(){
-	BOOST_FOREACH(ScoppedThreadsOnExitPtr e, on_exits){
-		e->exit();
-		e->SUBMACHINESTHREADS.threads.join_all();
-	}
-}
 
 
 #define FSM_HEADER(NAME) \
