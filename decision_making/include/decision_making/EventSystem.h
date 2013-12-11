@@ -18,17 +18,37 @@
 namespace decision_making{
 	using namespace std;
 
-struct FSMCallContext{
+class CallContextParameters{
+public:
+		virtual ~CallContextParameters(){}
+		typedef boost::shared_ptr<CallContextParameters> Ptr;
+		virtual std::string str()=0;
+};
+struct CallContext{
+private:
+	CallContextParameters::Ptr _parameters;
+public:
 	vector<string> stack;
-	FSMCallContext(const FSMCallContext& ctx, string name){
-		stack = ctx.stack; push(name);
-	}
-	FSMCallContext(string name){
+
+	CallContext(const CallContext& ctx, string name){
+		if(ctx.stack.size()>0)
+			stack = ctx.stack;
 		push(name);
+		_parameters = ctx._parameters;
+		//cout<<"[ ctx created : "<<str()<<" ]";
 	}
-	FSMCallContext(){
+	CallContext(string name){
+		push(name);
+		//cout<<"[ ctx created : "<<str()<<" ]";
+	}
+	CallContext(){
+		//cout<<"[ ctx created : "<<str()<<" ]";
+	}
+	~CallContext(){
+		//cout<<"[ ctx deleted : "<<str()<<" ]";
 	}
 	string str()const{
+		if(stack.size()==0) return "/";
 		stringstream path;
 		BOOST_FOREACH(string s, stack){
 			path<<"/"<<s;
@@ -37,10 +57,20 @@ struct FSMCallContext{
 	}
 	void push(string name){ stack.push_back(name); }
 	void pop(){ stack.pop_back(); }
+
+	template<class A>
+	void createParameters(A* a= new A()){
+		_parameters = CallContextParameters::Ptr(a);
+	}
+	bool isParametersDefined()const{ return _parameters.get()!=NULL; }
+	template<class A>
+	A& parameters()const{ return *(boost::shared_static_cast<A>(_parameters).get()); }
 };
+typedef CallContext FSMCallContext;
+
 struct Event{
 	string _name;
-	Event(string lname, const FSMCallContext& ctx){
+	Event(string lname, const CallContext& ctx){
 		if(lname.size()==0){ _name=lname; return; }
 		if(lname[0]=='/'){ _name = lname; return; }
 		_name = ctx.str()+"/"+lname;

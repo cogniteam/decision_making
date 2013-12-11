@@ -12,6 +12,8 @@
 #define DECISION_MAKING_EVENTS_MACROSES
 #warning Decision Making: On decisions states changes reports are disabled.
 
+#define DM_SYSTEM_STOP
+
 #define ON_FSM_START(NAME, CALLS, EVENTS)
 #define ON_FSM_END(NAME, CALLS, EVENTS, RESULT)
 

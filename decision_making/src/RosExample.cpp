@@ -295,7 +295,7 @@ void EVENTS_GENERATOR(){
 	mainEventQueue->close();
 }
 
-TaskResult tst_mytask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
+TaskResult tst_mytask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
 	cout<<" this this my task ";
 	queue.riseEvent(Event("success", call_ctx));
 	return TaskResult::SUCCESS();

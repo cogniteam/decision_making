@@ -17,33 +17,49 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 
 #include <map>
+#include <boost/function.hpp>
+
+namespace decision_making{
+
 class LocalTasks{
-	typedef decision_making::TaskResult (* callTask)(std::string, const decision_making::FSMCallContext&, decision_making::EventQueue&);
+	typedef decision_making::TaskResult (* callTask)(std::string, const decision_making::CallContext&, decision_making::EventQueue&);
 	typedef std::map<std::string, callTask> callbacks;
+	typedef boost::function<decision_making::TaskResult (std::string, const decision_making::CallContext&, decision_making::EventQueue&) > callTask_fun;
+	typedef std::map<std::string, callTask_fun> callbacks_fun;
 	static callbacks& get(){ static callbacks t; return t; }
+	static callbacks_fun& get_fun(){ static callbacks_fun t; return t; }
 public:
 	static void registrate(std::string task_name, callTask cb){
 		get()[task_name]=cb;
 	}
+	static void registrate(std::string task_name, callTask_fun cb){
+		get_fun()[task_name]=cb;
+	}
 	static bool registrated(std::string task_name){
-		return get().find(task_name)!=get().end();
+		return get().find(task_name)!=get().end() or get_fun().find(task_name)!=get_fun().end();
 	}
 	static decision_making::TaskResult call(
 			std::string task_name,
 			std::string task_address,
-			const decision_making::FSMCallContext& call_ctx,
+			const decision_making::CallContext& call_ctx,
 			decision_making::EventQueue& events){
-		return get()[task_name](task_address, call_ctx, events);
+		if(get().find(task_name)!=get().end())
+			return get()[task_name](task_address, call_ctx, events);
+		if(get_fun().find(task_name)!=get_fun().end())
+			return get_fun()[task_name](task_address, call_ctx, events);
+		return decision_making::TaskResult::FAIL(1000,"Task Not Registrated As Local Task");
 	}
 };
 
 
-decision_making::TaskResult callTask(std::string task_address, const decision_making::FSMCallContext& call_ctx, decision_making::EventQueue& events);
-#define CALL_REMOTE(NAME, CALLS, EVENTS) boost::bind(&callTask, #NAME, CALLS, EVENTS)
+decision_making::TaskResult callTask(std::string task_address, const decision_making::CallContext& call_ctx, decision_making::EventQueue& events);
+#define CALL_REMOTE(NAME, CALLS, EVENTS) boost::bind(&decision_making::callTask, #NAME, CALLS, EVENTS)
 
 #define DECISION_MAKING_EVENTS_MACROSES
 
-#define ON_FUNCTION(FNAME) void FNAME(std::string name, std::string type, const decision_making::FSMCallContext& call_ctx, decision_making::EventQueue& events, decision_making::TaskResult result)
+#define DM_SYSTEM_STOP and ros::ok()
+
+#define ON_FUNCTION(FNAME) void FNAME(std::string name, std::string type, const decision_making::CallContext& call_ctx, decision_making::EventQueue& events, decision_making::TaskResult result)
 #define NO_RESULT decision_making::TaskResult::UNDEF()
 
 ON_FUNCTION(on_fsm_start);
@@ -54,9 +70,9 @@ ON_FUNCTION(on_fsm_end);
 
 
 ON_FUNCTION(on_fsm_state_start);
-#define ON_FSM_STATE_START(NAME, CALLS, EVENTS) on_fsm_state_start(NAME, "FSM_STATE", decision_making::FSMCallContext(CALLS,NAME), EVENTS, NO_RESULT)
+#define ON_FSM_STATE_START(NAME, CALLS, EVENTS) on_fsm_state_start(NAME, "FSM_STATE", decision_making::CallContext(CALLS,NAME), EVENTS, NO_RESULT)
 ON_FUNCTION(on_fsm_state_end);
-#define ON_FSM_STATE_END(NAME, CALLS, EVENTS) on_fsm_state_end(NAME, "FSM_STATE", decision_making::FSMCallContext(CALLS,NAME), EVENTS, NO_RESULT)
+#define ON_FSM_STATE_END(NAME, CALLS, EVENTS) on_fsm_state_end(NAME, "FSM_STATE", decision_making::CallContext(CALLS,NAME), EVENTS, NO_RESULT)
 
 
 ON_FUNCTION(on_bt_node_start);
@@ -69,11 +85,11 @@ class RosConstraints{
 public:
 
 	static ros::Publisher& getAdder(){
-		static ros::Publisher p = ros::NodeHandle().advertise<std_msgs::String>("/scriptable_analyzer/add_script", 100);
+		static ros::Publisher p = ros::NodeHandle().advertise<std_msgs::String>("/scriptable_monitor/add_script", 100);
 		return p;
 	}
 	static ros::Publisher& getRemover(){
-		static ros::Publisher p = ros::NodeHandle().advertise<std_msgs::String>("/scriptable_analyzer/remove_script", 100);
+		static ros::Publisher p = ros::NodeHandle().advertise<std_msgs::String>("/scriptable_monitor/remove_script", 100);
 		return p;
 	}
 
@@ -114,7 +130,7 @@ public:
 	virtual void riseEvent(const decision_making::Event& e);
 };
 
-
+}
 
 void ros_decision_making_init(int &argc, char **argv);
 

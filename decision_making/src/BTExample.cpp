@@ -93,7 +93,7 @@ void EVENTS_GENERATOR(){
 //==================== CONNECTION TO REAL TASKS ==============================
 
 //FROM BT
-TaskResult test_callTask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
+TaskResult test_callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
 	cout<<" TASK("<<task_address<<":CALL) ";
 	Event e = mainEventQueue.waitEvent();
 	if(e=="SUCCESS") return TaskResult::SUCCESS();
@@ -102,7 +102,7 @@ TaskResult test_callTask(std::string task_address, const FSMCallContext& call_ct
 
 
 //FROM FSM
-//void callTask(std::string task_address, const FSMCallContext& call_ctx, EventQueue* queue){
+//void callTask(std::string task_address, const CallContext& call_ctx, EventQueue* queue){
 //	cout<<" TASK("<<task_address<<":CALL) ";
 //	while(true)
 //	{

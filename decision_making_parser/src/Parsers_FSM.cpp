@@ -249,6 +249,22 @@ public:
 		}
 		return true;
 	}
+	string encode(const std::string& data) {
+	    std::string buffer;
+	    buffer.reserve(data.size()*1.1);
+	    for(size_t pos = 0; pos != data.size(); ++pos) {
+	        switch(data[pos]) {
+	            case '&':  buffer.append("&amp;");       break;
+	            case '\"': buffer.append("&quot;");      break;
+	            case '\'': buffer.append("&apos;");      break;
+	            case '<':  buffer.append("&lt;");        break;
+	            case '>':  buffer.append("&gt;");        break;
+	            default:   buffer.append(&data[pos], 1); break;
+	        }
+	    }
+	    //data.swap(buffer);
+	    return buffer;
+	}
 	bool search_on_conditions_in_transition(tstream& stream, Token& tkn){
 		if( tkn.type == tkn_on_condition ){
 			TKN_NEXT( tkn_bopen)
@@ -257,7 +273,7 @@ public:
 			PRINT("on condition : "<<text);
 			constructor.fsm().state().create_event();
 			constructor.fsm().state().event().type="condition";
-			constructor.fsm().state().event().text=text;
+			constructor.fsm().state().event().text=encode(text);
 			bool found_next = false, found_rise = false;
 			stream >> tkn;
 			TKN_SEARCH( search_next_in_events(stream, tkn, found_next) )

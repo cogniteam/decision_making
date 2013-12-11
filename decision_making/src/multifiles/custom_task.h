@@ -10,7 +10,7 @@
 
 #include "main_include.h"
 
-TaskResult callTask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
+TaskResult callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
 	DMDEBUG( cout<<" TASK("<<task_address<<":CALL) " ;)
 	while(true)
 	{
