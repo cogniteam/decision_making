@@ -103,20 +103,24 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(example1 src/example1.cpp)
+add_executable(roombaFSM src/Roomba.cpp)
+add_executable(turnstileFSM src/Turnstile.cpp)
+add_executable(ScxmlHierarchyExampleFSM src/ScxmlHierarchyExample.cpp)
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(decision_making_examples_node decision_making_examples_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(example1
-  ${catkin_LIBRARIES}
-)
-
+target_link_libraries(roombaFSM ${catkin_LIBRARIES} )
+target_link_libraries(turnstileFSM ${catkin_LIBRARIES} )
+target_link_libraries(ScxmlHierarchyExampleFSM ${catkin_LIBRARIES} )
 
 decision_making_parsing(
-	src/example1.cpp
+	src/Roomba.cpp
+	src/Turnstile.cpp
+	src/ScxmlHierarchyExample.cpp
 )
 
 #############

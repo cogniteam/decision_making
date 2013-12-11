@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  genmsg
 ) 
 
 ## System dependencies are found with CMake's conventions
@@ -50,7 +49,8 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 
 add_action_files(
   DIRECTORY action
-  FILES RobotTask.action
+  FILES 
+  RobotTask.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -71,7 +71,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS include
 # LIBRARIES robot_task
- CATKIN_DEPENDS actionlib actionlib_msgs message_runtime message_generation roscpp rospy std_msgs
+ CATKIN_DEPENDS actionlib actionlib_msgs message_generation roscpp rospy std_msgs
 # DEPENDS system_lib
 # CFG_EXTRAS robot_task-extras.cmake
 )
