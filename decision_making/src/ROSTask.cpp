@@ -297,9 +297,11 @@ std::string RosConstraints::preproc(std::string txt)const{
 }
 
 RosEventQueue::RosEventQueue():decision_making::EventQueue(){
-	publisher = ros::NodeHandle().advertise<std_msgs::String>("/decision_making/events", 100);
+	std::string node_name = ros::this_node::getName();
+	std::string topic_name = "/decision_making/"+node_name+"/events";
+	publisher = ros::NodeHandle().advertise<std_msgs::String>(topic_name, 100);
 	{boost::this_thread::sleep(boost::posix_time::seconds(1.0));}
-	subscriber= ros::NodeHandle().subscribe<std_msgs::String>("/decision_making/events", 100, &RosEventQueue::onNewEvent, this);
+	subscriber= ros::NodeHandle().subscribe<std_msgs::String>(topic_name, 100, &RosEventQueue::onNewEvent, this);
 	{boost::this_thread::sleep(boost::posix_time::seconds(1.0));}
 }
 RosEventQueue::RosEventQueue(EventQueue* parent):decision_making::EventQueue(parent){
@@ -308,7 +310,7 @@ RosEventQueue::RosEventQueue(EventQueue* parent, bool isTransit):decision_making
 }
 
 void RosEventQueue::onNewEvent(const std_msgs::String::ConstPtr& msg){
-	cout<<"RosEventQueue:onNewEvent: "<<msg->data<<endl;
+	//cout<<"RosEventQueue:onNewEvent: "<<msg->data<<endl;
 	decision_making::Event e(msg->data);
 	decision_making::EventQueue::riseEvent(e);
 }

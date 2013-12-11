@@ -63,8 +63,17 @@ public:
 		_parameters = CallContextParameters::Ptr(a);
 	}
 	bool isParametersDefined()const{ return _parameters.get()!=NULL; }
+	struct ExceptionParametersUndefined{};
 	template<class A>
-	A& parameters()const{ return *(boost::shared_static_cast<A>(_parameters).get()); }
+	A& parameters()const{
+		if(isParametersDefined()==false) throw ExceptionParametersUndefined();
+		return *(boost::shared_static_cast<A>(_parameters).get());
+	}
+	template<class A>
+	A& parameters(){
+		if(isParametersDefined()==false) createParameters<A>();
+		return *(boost::shared_static_cast<A>(_parameters).get());
+	}
 };
 typedef CallContext FSMCallContext;
 
