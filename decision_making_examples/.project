@@ -124,37 +124,107 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1/</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM/</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1/Source Files</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM/Source Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1/Source Files/example1.cpp</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM/Source Files/ScxmlHierarchyExample.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_examples/src/example1.cpp</location>
+			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_examples/src/ScxmlHierarchyExample.cpp</location>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1/Header Files</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM/Header Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1/CMake Rules</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM/CMake Rules</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] example1/Resources</name>
+			<name>[Targets]/[exe] ScxmlHierarchyExampleFSM/Resources</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM/</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM/Source Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM/Source Files/Roomba.cpp</name>
+			<type>1</type>
+			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_examples/src/Roomba.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM/Header Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM/CMake Rules</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] roombaFSM/Resources</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM/</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM/Source Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM/Source Files/Turnstile.cpp</name>
+			<type>1</type>
+			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_examples/src/Turnstile.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM/Header Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM/CMake Rules</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] turnstileFSM/Resources</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>

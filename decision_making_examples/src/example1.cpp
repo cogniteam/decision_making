@@ -9,7 +9,7 @@
 using namespace std;
 using namespace decision_making;
 
-EventQueue mainEventQueue;
+EventQueue* mainEventQueue;
 
 FSM(Turnstile)
 {
@@ -23,26 +23,37 @@ FSM(Turnstile)
 	{
 		FSM_STATE(Locked)
 		{
+			FSM_CALL_TASK(MYTASK);
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(COIN, FSM_NEXT(Unlocked));
-				FSM_ON_EVENT(PUSH, FSM_NEXT(Locked));
+				FSM_PRINT_EVENT
+				FSM_ON_EVENT(/COIN, FSM_NEXT(Unlocked));
+				FSM_ON_EVENT(/PUSH, FSM_NEXT(Locked));
 			}
 		}
 		FSM_STATE(Unlocked)
 		{
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(COIN, FSM_NEXT(Unlocked));
-				FSM_ON_EVENT(PUSH, FSM_NEXT(Locked));
+				FSM_PRINT_EVENT
+				FSM_ON_EVENT(/COIN, FSM_NEXT(Unlocked));
+				FSM_ON_EVENT(/PUSH, FSM_NEXT(Locked));
 			}
 		}
 	}
 	FSM_END
 }
 
+class PP: public CallContextParameters{
+public:
+	int x;
+	virtual std::string str(){ std::stringstream s; s<<x; return s.str();};
+};
 void run_fsm(){
-	FsmTurnstile(NULL, &mainEventQueue);
+	CallContext ct;
+	ct.createParameters<PP>();
+	ct.parameters<PP>().x =10;
+	FsmTurnstile(&ct, mainEventQueue);
 }
 
 
@@ -54,14 +65,16 @@ void EVENTS_GENERATOR(){
 		Event t = spec[i];
 		if(t == "NOTHING"){ i=1; t=spec[0]; }else i++;
 		cout << endl << t<<" -> ";
-		mainEventQueue.riseEvent(t);
+		mainEventQueue->riseEvent(t);
 		boost::this_thread::sleep(boost::posix_time::seconds(1));
 	}
-	mainEventQueue.close();
+	mainEventQueue->close();
 }
 
-TaskResult tst_mytask(std::string task_address, const FSMCallContext& call_ctx, EventQueue& queue){
-	cout<<"[ this my dummy task ]";
+TaskResult tst_mytask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
+	cout<<"[ this my dummy task : x="<<call_ctx.parameters<PP>().x<<"]";
+	call_ctx.parameters<PP>().x = call_ctx.parameters<PP>().x + 1;
+	//cout<<"[ this my dummy task : x=? ]";
 	queue.riseEvent(Event("success", call_ctx));
 	return TaskResult::SUCCESS();
 }
@@ -72,6 +85,7 @@ int main(int a, char** aa){
 
 	ros::init(a, aa, "RosExample");
 	ros_decision_making_init(a, aa);
+	mainEventQueue = new RosEventQueue();
 
 	boost::thread_group threads;
 
@@ -81,9 +95,10 @@ int main(int a, char** aa){
 	threads.add_thread(new boost::thread(boost::bind(&run_fsm)));
 	threads.add_thread(new boost::thread(boost::bind(&EVENTS_GENERATOR)));
 
+	ros::spin();
 	threads.join_all();
 
-
+	delete mainEventQueue;
 	return 0;
 }
 

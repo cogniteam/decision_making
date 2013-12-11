@@ -79,7 +79,7 @@ macro(decision_making_parsing _SRC_FILE_LIST)
 			"     message(\"      -- " "$" "{" "f" "}" " \")" "\n"
 			"endforeach()" "\n"
 
-			"FILE(GLOB_RECURSE CREATED_FILES_ABS ${SHARE_DIR_NAME}/*.dot  ${SHARE_DIR_NAME}/*.xot)" "\n"
+			"FILE(GLOB_RECURSE CREATED_FILES_ABS ${SHARE_DIR_NAME}/*.dot)" "\n"
 			"foreach( f " "$" "{" "CREATED_FILES_ABS" "}" " )" "\n"
 			"	execute_process(COMMAND \"dot\" -Tgif -o" "$" "{" "f" "}" ".gif  " "$" "{" "f" "}" " RESULT_VARIABLE rv)" "\n" 
 			"endforeach()" "\n"
