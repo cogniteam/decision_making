@@ -19,9 +19,11 @@
 
 namespace decision_making{
 
+class ScoppedThreadsOnExit;
 struct ScoppedThreads{
 	typedef boost::shared_ptr<EventQueue> EventQueuePtr;
 	typedef boost::shared_ptr<CallContext> CallContextPtr;
+	typedef boost::shared_ptr<ScoppedThreadsOnExit> ScoppedThreadsOnExitPtr;
 	boost::thread_group threads;
 	vector<EventQueuePtr> events;
 	vector<CallContextPtr> contexts;
@@ -37,9 +39,34 @@ struct ScoppedThreads{
 	struct Cleaner{
 		ScoppedThreads& target;
 		Cleaner(ScoppedThreads& target):target(target){}
-		~Cleaner(){ target.stopEvents(); target.threads.join_all();}
+		~Cleaner(){
+			target.runOnExit();
+			target.stopEvents();
+			target.threads.join_all();
+		}
 	};
+
+	vector<ScoppedThreadsOnExitPtr> on_exits;
+	void add(ScoppedThreadsOnExitPtr exit){ on_exits.push_back(exit); }
+	void runOnExit();
 };
+class ScoppedThreadsOnExit{
+public:
+	EventQueue* events_queue;
+	CallContext& call_ctx;
+	ScoppedThreads SUBMACHINESTHREADS;
+	ScoppedThreadsOnExit(CallContext& call_ctx, EventQueue* events_queue):
+		events_queue(events_queue), call_ctx(call_ctx)
+	{}
+	virtual ~ScoppedThreadsOnExit(){}
+	virtual void exit()=0;
+};
+void ScoppedThreads::runOnExit(){
+	BOOST_FOREACH(ScoppedThreadsOnExitPtr e, on_exits){
+		e->exit();
+		e->SUBMACHINESTHREADS.threads.join_all();
+	}
+}
 
 
 #define FSM_HEADER(NAME) \
@@ -141,6 +168,16 @@ struct ScoppedThreads{
 				__CALL_BT_FUNCTION(NAME, boost::ref(__t_call_ctx##NAME), boost::ref(__t_events_queu##NAME))  \
 			);
 
+#define FSM_ON_STATE_EXIT_BGN \
+			class __ON_STATE_EXIT_STRUCT:public decision_making::ScoppedThreadsOnExit{public:\
+				__ON_STATE_EXIT_STRUCT(CallContext& call_ctx, EventQueue* events_queue):decision_making::ScoppedThreadsOnExit(call_ctx, events_queue){}\
+				virtual void exit(){
+
+#define FSM_ON_STATE_EXIT_END \
+				}\
+			};\
+			decision_making::ScoppedThreadsOnExit* __tmp___ON_STATE_EXIT_STRUCT = new __ON_STATE_EXIT_STRUCT(call_ctx, events_queue);\
+			SUBMACHINESTHREADS.add(decision_making::ScoppedThreads::ScoppedThreadsOnExitPtr(__tmp___ON_STATE_EXIT_STRUCT));
 
 #define FSM_STOP(EVENT, RESULT) \
 			fsm_stop=true; \

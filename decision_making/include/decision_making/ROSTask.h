@@ -29,14 +29,21 @@ class LocalTasks{
 	static callbacks& get(){ static callbacks t; return t; }
 	static callbacks_fun& get_fun(){ static callbacks_fun t; return t; }
 public:
+	typedef callTask_fun Function;
 	static void registrate(std::string task_name, callTask cb){
 		get()[task_name]=cb;
 	}
-	static void registrate(std::string task_name, callTask_fun cb){
+	static void registrate(std::string task_name, Function cb){
 		get_fun()[task_name]=cb;
 	}
 	static bool registrated(std::string task_name){
 		return get().find(task_name)!=get().end() or get_fun().find(task_name)!=get_fun().end();
+	}
+	static void unregistrated(std::string task_name){
+		if( get().find(task_name)!=get().end() )
+			get().erase(get().find(task_name));
+		if( get_fun().find(task_name)!=get_fun().end() )
+			get_fun().erase(get_fun().find(task_name));
 	}
 	static decision_making::TaskResult call(
 			std::string task_name,
