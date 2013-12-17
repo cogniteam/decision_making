@@ -13,7 +13,6 @@
   <run_depend>decision_making</run_depend>
   <run_depend>decision_making_examples</run_depend>
   <run_depend>decision_making_parser</run_depend>
-  <run_depend>rqt_decision_graph</run_depend>
 
   <export>
   	<metapackage/>

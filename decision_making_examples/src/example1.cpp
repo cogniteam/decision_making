@@ -24,6 +24,12 @@ FSM(Turnstile)
 		FSM_STATE(Locked)
 		{
 			FSM_CALL_TASK(MYTASK);
+			FSM_ON_STATE_EXIT_BGN
+			{
+				FSM_CALL_TASK(ONEXIT);
+			}
+			FSM_ON_STATE_EXIT_END
+
 			FSM_TRANSITIONS
 			{
 				FSM_PRINT_EVENT
@@ -71,13 +77,28 @@ void EVENTS_GENERATOR(){
 	mainEventQueue->close();
 }
 
-TaskResult tst_mytask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
-	cout<<"[ this my dummy task : x="<<call_ctx.parameters<PP>().x<<"]";
+class MMM{
+	int aa;
+public:
+	MMM():aa(1){}
+TaskResult tst_mytask(std::string task_address, const CallContext& call_ctx, EventQueue& queue, int ww){
+	cout<<endl<<"[ this my dummy task("<<task_address<<") : x="<<call_ctx.parameters<PP>().x<<", ww="<<ww<<", aa="<<aa<<" ]"<<endl;
 	call_ctx.parameters<PP>().x = call_ctx.parameters<PP>().x + 1;
+	aa+=1;
 	//cout<<"[ this my dummy task : x=? ]";
 	queue.riseEvent(Event("success", call_ctx));
 	return TaskResult::SUCCESS();
 }
+TaskResult tst_onexit(std::string task_address, const CallContext& call_ctx, EventQueue& queue, int ww){
+	cout<<endl<<"[ on exit task("<<task_address<<") : x="<<call_ctx.parameters<PP>().x<<", ww="<<ww<<", aa="<<aa<<" ]"<<endl;
+	call_ctx.parameters<PP>().x = call_ctx.parameters<PP>().x + 1;
+	aa+=1;
+	//cout<<"[ this my dummy task : x=? ]";
+	queue.riseEvent(Event("success", call_ctx));
+	return TaskResult::SUCCESS();
+}
+
+};
 
 #include <boost/filesystem.hpp>
 
@@ -90,7 +111,12 @@ int main(int a, char** aa){
 	boost::thread_group threads;
 
 	MapResultEvent::map("MYTASK", 0, "success");
-	LocalTasks::registrate("MYTASK", tst_mytask);
+
+	MMM mmm;
+	LocalTasks::Function f = boost::bind(&MMM::tst_mytask, &mmm, _1, _2, _3, 15);
+	LocalTasks::Function f_onexit = boost::bind(&MMM::tst_onexit, &mmm, _1, _2, _3, 15);
+	LocalTasks::registrate("MYTASK", f);
+	LocalTasks::registrate("ONEXIT", f_onexit);
 
 	threads.add_thread(new boost::thread(boost::bind(&run_fsm)));
 	threads.add_thread(new boost::thread(boost::bind(&EVENTS_GENERATOR)));
