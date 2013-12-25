@@ -15,6 +15,8 @@ from .dmg_item_factory import DmgItemFactory
 from .graph_item_factory import GraphItemFactory
 from .hovered_item_factory import HoveredGraphItemFactory
 
+from .dot_processor import DotProcessor
+
 class GraphWidget(QWidget):
     @staticmethod
     def get_unique_name(context):
@@ -53,6 +55,8 @@ class GraphWidget(QWidget):
         self.decision_graphs_combo_box.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLength)
         self.decision_graphs_combo_box.currentIndexChanged['QString'].connect(self._graph_item_changed)
 
+        self._dot_processor = DotProcessor(self._dot_to_qt)
+
         self.decision_graphs = dict()
 
     def update(self, message):
@@ -78,20 +82,29 @@ class GraphWidget(QWidget):
         loadUi(user_interface_file, self, {'InteractiveGraphicsView': InteractiveGraphicsView})
 
     def _import(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, self.tr('Import custom graph'), None, self.tr('DOT graph (*.dot)'))
+        file_path, _ = QFileDialog.getOpenFileName(self, self.tr('Import custom graph'),
+                                                   None, self.tr('DOT graph (*.dot)'))
 
         if file_path is None or file_path == '':
             return
 
-        custom_graph = Graph(self._dot_to_qt, file_path, file_path)
+        dot_data = None
+
+        try:
+            with open(file_path, 'r') as file_handler:
+                dot_data = file_handler.read()
+        except IOError:
+            print 'Fail, epic fail'
+            return
+
+        # self._dot_processor.process(dot_data)
+
+        custom_graph = Graph(self._dot_processor, file_path, file_path)
         self.decision_graphs[custom_graph.source] = custom_graph
         self._current_graph = custom_graph
 
         self.decision_graphs_combo_box.addItem(custom_graph.source)
         self.decision_graphs_combo_box.setCurrentIndex(self.decision_graphs_combo_box.findText(custom_graph.source))
-
-        self._redraw_graph_view()
-        self._fit_to_view()
 
     # Export graph as image
     def _export(self):
@@ -117,7 +130,7 @@ class GraphWidget(QWidget):
                                        data['node_run_id'],
                                        data['node_name'],
                                        data['node_exe_file'],
-                                       self._dot_to_qt)
+                                       self._dot_processor)
 
         self.decision_graphs[key] = decision_graph
         self.decision_graphs_combo_box.addItem(key)
@@ -129,6 +142,7 @@ class GraphWidget(QWidget):
         is_updated = False
         if self._current_graph is not None:
             for node in self._current_graph.nodes.values():
+                print node.url, name
                 if name == node.url:
                     node.highlight(True) if 'started' == status else node.highlight(False)
                     is_updated = True
@@ -151,8 +165,9 @@ class GraphWidget(QWidget):
         return data['name'].split('/')[1] + data['node_name']
 
     def _redraw_graph_view(self):
-        self._scene.clear()
+
         self._current_graph.load()
+        self._scene.clear()
 
         for node_item in self._current_graph.nodes.itervalues():
             self._scene.addItem(node_item)

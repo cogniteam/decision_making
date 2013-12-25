@@ -13,9 +13,9 @@ class Graph(object):
         except IOError:
             return None
 
-    def __init__(self, dot_to_qt, source, parent=None):
+    def __init__(self, dot_processor, source, parent=None):
         super(Graph, self).__init__()
-        self.dot_to_qt = dot_to_qt
+        self.dot_processor = dot_processor
         self.parent = parent
         self.name = None
         self.nodes = None
@@ -30,7 +30,7 @@ class Graph(object):
         if dot_data is None:
             raise GraphParseException("Could not read dot file")
 
-        graph = pydot.graph_from_dot_data(dot_data)
+        graph = pydot.graph_from_dot_data(dot_data.encode("ascii", "ignore"))
         if graph is None:
             raise GraphParseException("Could not create graph based on loaded dot data")
 
@@ -38,7 +38,7 @@ class Graph(object):
         if dot_graph is None:
             raise GraphParseException("Could not create DOT graph based on graph")
 
-        self.nodes, self.edges = self.dot_to_qt.dotcode_to_qt_items(dot_graph)
+        self.nodes, self.edges = self.dot_processor.process(dot_graph)
 
 
 class GraphParseException(Exception):

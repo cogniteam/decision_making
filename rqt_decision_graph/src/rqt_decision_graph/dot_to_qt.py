@@ -57,7 +57,7 @@ def get_unquoted(item, name):
 
 # hack required to show properly long labels of custom shapes
 def clean_line_separator(attribute):
-    return attribute.replace('\\\n', '')
+    return attribute.replace('\\', '')
 
 # approximately, for workarounds (TODO: get this from dotfile somehow)
 LABEL_HEIGHT = 30
@@ -198,6 +198,63 @@ class DotToQtGenerator():
         for edge in graph.get_edge_list():
             self.add_edge_item_for_edge(edge, nodes, edges)
 
+    def get_cluster_node(self, node):
+        # let pydot imitate pygraphviz api
+        attr = {}
+        for name in node.get_attributes().iterkeys():
+            value = get_unquoted(node, name)
+            attr[name] = value
+        obj_dic = node.__getattribute__("obj_dict")
+        for name in obj_dic:
+            if name not in ['nodes', 'attributes', 'parent_graph'] and obj_dic[name] is not None:
+                attr[name] = get_unquoted(obj_dic, name)
+            elif name == 'nodes':
+                for key in obj_dic['nodes']['graph'][0]['attributes']:
+                    attr[key] = get_unquoted(obj_dic['nodes']['graph'][0]['attributes'], key)
+        node.attr = attr
+
+        name = None
+        if 'label' in node.attr:
+            name = node.attr['label']
+        elif 'name' in node.attr:
+            name = node.attr['name']
+        else:
+            print("Error, no label defined for node with attr: %s" % node.attr)
+            return None
+        if name is None:
+            # happens on Lucid pygraphviz version
+            print("Error, label is None for node %s, pygraphviz version may be too old." % node)
+
+        bb_width = node.attr['width']
+        bb_height = node.attr['height']
+
+        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width), POINTS_PER_INCH * float(bb_height))
+        # print bounding_box
+        pos = (0, 0)
+        if 'pos' in node.attr:
+            pos = node.attr['pos'].split(',')
+        bounding_box.moveCenter(QPointF(float(pos[0]), -float(pos[1])))
+
+        label_pos = QPointF(bounding_box.center().x(), bounding_box.top() + LABEL_HEIGHT / 2)
+
+        # label_pos = (100, 100)
+        # label_pos = (float(bb[0]) + (float(bb[2]) - float(bb[0])) / 2,
+        #                  float(bb[1]) + (float(bb[3]) - float(bb[1])) - LABEL_HEIGHT / 2)
+
+        color = QColor(node.attr['color']) if 'color' in node.attr else None
+
+        url = node.attr['URL'] if 'URL' in node.attr else 'N/A'
+        label = node.attr['label'] if 'label' in node.attr else name
+
+        graph_node_item = self._factory.create_node(bounding_box=bounding_box,
+                                                    shape='box',
+                                                    label=label,
+                                                    label_pos=label_pos,
+                                                    url=url,
+                                                    cluster=True)
+
+        return graph_node_item
+
     def get_subgraph_nodes(self, graph, nodes):
         # let pydot imitate pygraphviz api
         attr = {}
@@ -289,6 +346,18 @@ class DotToQtGenerator():
             return {}, {}
 
         graph = pydot.graph_from_dot_data(dotcode.encode("ascii", "ignore"))
+
+        nodes = {}
+        edges = {}
+
+        self.get_graph_nodes(graph, nodes)
+        self.get_graph_edges(graph, nodes, edges)
+
+        return nodes, edges
+
+    def dotcode_to_qt_items2(self, graph):
+        if graph is None:
+            return {}, {}
 
         nodes = {}
         edges = {}
