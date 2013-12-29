@@ -21,7 +21,6 @@ msg/*Feedback.msg
 msg/*Goal.msg
 msg/*Result.msg
 msg/lisp
-__init__.py
 __init__.pyc
 
 ######for catkin
