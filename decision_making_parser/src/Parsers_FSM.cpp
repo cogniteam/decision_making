@@ -26,14 +26,14 @@ public:
 		tkn_transitions,
 		tkn_on_event,
 		tkn_on_condition,
-		tkn_rise,
+		tkn_raise,
 		tkn_states,
+		tkn_next,
 
 		tkn_bopen,
 		tkn_bclose,
 		tkn_fopen,
 		tkn_fclose,
-		tkn_next,
 		tkn_semicol,
 		tkn_col,
 		tkn_slesh,
@@ -57,7 +57,8 @@ public:
 			tkn.string_token["FSM_TRANSITIONS"]=tkn_transitions;
 			tkn.string_token["FSM_ON_EVENT"]=tkn_on_event;
 			tkn.string_token["FSM_ON_CONDITION"]=tkn_on_condition;
-			tkn.string_token["FSM_RISE"]=tkn_rise;
+			tkn.string_token["FSM_RAISE"]=tkn_raise;
+			tkn.string_token["FSM_RISE"]=tkn_raise;
 			tkn.string_token["FSM_STATES"]=tkn_states;
 
 			tkn.spec_token['(']=tkn_bopen;
@@ -192,14 +193,14 @@ public:
 		}
 		return true;
 	}
-	bool search_rises_in_state(tstream& stream, Token& tkn){
-		if( tkn.type == tkn_rise ){
+	bool search_raises_in_state(tstream& stream, Token& tkn){
+		if( tkn.type == tkn_raise ){
 			TKN_NEXT(tkn_bopen)
 			string text="";
 			TKN_SEARCH( textUpTo(stream, tkn_bclose, text));
-			PRINT("rise event: "<<text);
-			fsm_constructor::Rice rise; rise.text=text;
-			constructor.fsm().state().rises.push_back(rise);
+			PRINT("raise event: "<<text);
+			fsm_constructor::Raise raise; raise.text=text;
+			constructor.fsm().state().raises.push_back(raise);
 		}
 		return true;
 	}
@@ -214,14 +215,14 @@ public:
 		}
 		return true;
 	}
-	bool search_rise_in_events(tstream& stream, Token& tkn, bool& found){
-		if( tkn.type == tkn_rise ){
+	bool search_raise_in_events(tstream& stream, Token& tkn, bool& found){
+		if( tkn.type == tkn_raise ){
 			TKN_NEXT(tkn_bopen)
 			string text="";
 			TKN_SEARCH( textUpTo(stream, tkn_bclose, text));
-			PRINT("rise event: "<<text);
+			PRINT("raise event: "<<text);
 			found = true;
-			fsm_constructor::EventAction ac; ac.type="rise";
+			fsm_constructor::EventAction ac; ac.type="raise";
 			ac.text=text;
 			constructor.fsm().state().event().actions.push_back(ac);
 		}
@@ -236,11 +237,11 @@ public:
 			constructor.fsm().state().create_event();
 			constructor.fsm().state().event().type="event";
 			constructor.fsm().state().event().text=text;
-			bool found_next = false, found_rise = false;
+			bool found_next = false, found_raise = false;
 			stream >> tkn;
 			TKN_SEARCH( search_next_in_events(stream, tkn, found_next) )
-			TKN_SEARCH( search_rise_in_events(stream, tkn, found_rise) )
-			if(found_next==false and found_rise==false){
+			TKN_SEARCH( search_raise_in_events(stream, tkn, found_raise) )
+			if(found_next==false and found_raise==false){
 				constructor.fsm().state().drop_event();
 				return false;
 			}
@@ -274,11 +275,11 @@ public:
 			constructor.fsm().state().create_event();
 			constructor.fsm().state().event().type="condition";
 			constructor.fsm().state().event().text=encode(text);
-			bool found_next = false, found_rise = false;
+			bool found_next = false, found_raise = false;
 			stream >> tkn;
 			TKN_SEARCH( search_next_in_events(stream, tkn, found_next) )
-			TKN_SEARCH( search_rise_in_events(stream, tkn, found_rise) )
-			if(found_next==false and found_rise==false){
+			TKN_SEARCH( search_raise_in_events(stream, tkn, found_raise) )
+			if(found_next==false and found_raise==false){
 				constructor.fsm().state().drop_event();
 				return false;
 			}
@@ -295,7 +296,7 @@ public:
 		while(not stream.eof()){
 			stream >> tkn;
 			TKN_SEARCH( search_calls_in_state(stream , tkn) )
-			TKN_SEARCH( search_rises_in_state(stream , tkn) )
+			TKN_SEARCH( search_raises_in_state(stream , tkn) )
 			if( tkn.type == tkn_transitions ){
 				PRINT("transition");
 				TKN_NEXT_OPTIONAL(tkn_fopen, return true)
@@ -498,7 +499,7 @@ ostream& operator<<(ostream& out, FSMParser::TokenType t){
 		PRINTTKN(transitions)
 		PRINTTKN(on_event)
 		PRINTTKN(on_condition)
-		PRINTTKN(rise)
+		PRINTTKN(raise)
 		PRINTTKN(states)
 
 		PRINTTKN(bopen)

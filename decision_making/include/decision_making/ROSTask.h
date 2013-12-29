@@ -88,6 +88,17 @@ ON_FUNCTION(on_bt_node_end);
 #define ON_BT_NODE_END(NAME, CALLS, EVENTS, RESULT) on_bt_node_end(NAME, "BT_NODE", CALLS, EVENTS, RESULT)
 
 
+ON_FUNCTION(on_tao_tree_start);
+#define ON_TAO_START(NAME, CALLS, EVENTS) on_tao_tree_start(NAME, "TAO", CALLS, EVENTS, NO_RESULT)
+ON_FUNCTION(on_tao_tree_end);
+#define ON_TAO_END(NAME, CALLS, EVENTS, RESULT) on_tao_tree_end(NAME, "TAO", CALLS, EVENTS, RESULT)
+
+ON_FUNCTION(on_tao_plan_start);
+#define ON_TAO_STATE_START(NAME, CALLS, EVENTS) on_tao_plan_start(NAME, "TAO_PLAN", decision_making::CallContext(CALLS,NAME), EVENTS, NO_RESULT)
+ON_FUNCTION(on_tao_plan_end);
+#define ON_TAO_STATE_END(NAME, CALLS, EVENTS) on_tao_plan_end(NAME, "TAO_PLAN", decision_making::CallContext(CALLS,NAME), EVENTS, NO_RESULT)
+
+
 class RosConstraints{
 public:
 
@@ -134,7 +145,8 @@ public:
 	RosEventQueue(EventQueue* parent, bool isTransit);
 
 	void onNewEvent(const std_msgs::String::ConstPtr& msg);
-	virtual void riseEvent(const decision_making::Event& e);
+	virtual void raiseEvent(const decision_making::Event& e);
+	virtual bool check_external_ok(){return ros::ok();}
 };
 
 }

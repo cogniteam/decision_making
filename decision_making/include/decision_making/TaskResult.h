@@ -29,6 +29,7 @@ public:
 	TaskResult():error_(undefied_code),description_("UNDEF"){}
 	static TaskResult SUCCESS(){ return TaskResult(0,"OK"); }
 	static TaskResult FAIL(int er=error_start_code, std::string what="FIAL"){ return TaskResult(er, what); }
+	static TaskResult FAIL(std::string what){ return TaskResult(error_start_code, what); }
 	static TaskResult TERMINATED(){ return TaskResult(preempted_code, "TERMINATED"); }
 	static TaskResult UNDEF(){ return TaskResult(undefied_code, "UNDEF"); }
 	bool isFail()const{ return error_>=error_start_code and error_!=undefied_code; }

@@ -53,7 +53,7 @@ FSM(Turnstile)
 class PP: public CallContextParameters{
 public:
 	int x;
-	virtual std::string str(){ std::stringstream s; s<<x; return s.str();};
+	virtual std::string str()const{ std::stringstream s; s<<x; return s.str();};
 };
 void run_fsm(){
 	CallContext ct;

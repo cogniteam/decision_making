@@ -109,6 +109,7 @@ public:
 #define __STARTOFSTATE(X) \
 		DMDEBUG( string outname("STT("+fsm_name+":"+call_ctx.str()+"/"+#X+")");cout<<outname<<"{ "; )\
 		std::string state_name(#X);\
+		decision_making::CallContext state_call_ctx(call_ctx, state_name);\
 		ON_FSM_STATE_START(state_name, call_ctx, *events_queue);
 
 #define __ENDOFSTATE \
@@ -143,9 +144,12 @@ public:
 				DO;\
 			}
 
-#define FSM_RISE(EVENT) \
-			DMDEBUG( cout<<" RISE("<<fsm_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
-			events_queue->riseEvent(decision_making::Event(#EVENT, call_ctx));
+#define FSM_RAISE(EVENT) \
+			DMDEBUG( cout<<" RAISE("<<fsm_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
+			events_queue->raiseEvent(decision_making::Event(#EVENT, call_ctx));
+
+//Deprecated
+#define FSM_RISE(EVENT) FSM_RAISE(EVENT)
 
 #define FSM_EVENTS_DROP events_queue->drop_all();
 
@@ -190,7 +194,7 @@ public:
 
 #define FSM_STOP(EVENT, RESULT) \
 			fsm_stop=true; \
-			FSM_RISE(EVENT); \
+			FSM_RAISE(EVENT); \
 			fsm_result = RESULT; \
 			break;
 
@@ -199,7 +203,7 @@ public:
 
 #define FSM_DROP_EVENTS events_queue->drop_all();
 
-#define FSM_PRINT_EVENT cout<<" READ("<<fsm_name<<":"<<event<<") ";
+#define FSM_PRINT_EVENT if(not event.equals(decision_making::Event::SPIN_EVENT())){ cout<<" READ("<<fsm_name<<":"<<event<<") "; }
 
 }
 

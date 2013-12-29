@@ -43,11 +43,11 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.build.arguments</key>
-					<value></value>
+					<value>-j8</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser</value>
+					<value>/home/blackpc/git/robil/ws/src/decision_making_parser</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>
@@ -83,7 +83,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.build.location</key>
-					<value>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser</value>
+					<value>/home/blackpc/git/robil/ws/src/decision_making_parser</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.autoBuildTarget</key>
@@ -139,34 +139,54 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>[Targets]/[exe] decision_making_parser/Source Files/TAOConstructor.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/TAOConstructor.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] decision_making_parser/Source Files/Parsers_TAO.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Parsers_TAO.cpp</location>
+		</link>
+		<link>
 			<name>[Targets]/[exe] decision_making_parser/Source Files/BTConstructor.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/BTConstructor.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/BTConstructor.cpp</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] decision_making_parser/Source Files/Constructors.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/Constructors.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Constructors.cpp</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] decision_making_parser/Source Files/decision_making_parser.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/decision_making_parser.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/decision_making_parser.cpp</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] decision_making_parser/Source Files/FSMConstructor.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/FSMConstructor.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/FSMConstructor.cpp</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] decision_making_parser/Source Files/Parsers_BT.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/Parsers_BT.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Parsers_BT.cpp</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] decision_making_parser/Source Files/Parsers_FSM.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/Parsers_FSM.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Parsers_FSM.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] decision_making_parser/Source Files/BTConstructor_for_Dot.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/BTConstructor_for_Dot.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] decision_making_parser/Source Files/FSMConstructor_for_Dot.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/FSMConstructor_for_Dot.cpp</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] decision_making_parser/Header Files</name>
@@ -184,37 +204,92 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code</name>
+			<name>[Targets]/[exe] decision_making_parser/Object Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code/</name>
+			<name>[Targets]/[exe] tao_parser_test</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code/Source Files</name>
+			<name>[Targets]/[exe] tao_parser_test/</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code/Source Files/test_parser.cpp</name>
+			<name>[Targets]/[exe] tao_parser_test/Source Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/TAOParserTest.cpp</name>
 			<type>1</type>
-			<location>/home/dan/workspace/robil_2/robil/ws/src/decision_making_parser/src/test_parser.cpp</location>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/TAOParserTest.cpp</location>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code/Header Files</name>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/TAOConstructor.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/TAOConstructor.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/Parsers_TAO.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Parsers_TAO.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/BTConstructor.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/BTConstructor.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/Constructors.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Constructors.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/FSMConstructor.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/FSMConstructor.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/Parsers_BT.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Parsers_BT.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/Parsers_FSM.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/Parsers_FSM.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/BTConstructor_for_Dot.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/BTConstructor_for_Dot.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Source Files/FSMConstructor_for_Dot.cpp</name>
+			<type>1</type>
+			<location>/home/blackpc/git/robil/ws/src/decision_making_parser/src/FSMConstructor_for_Dot.cpp</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Header Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code/CMake Rules</name>
+			<name>[Targets]/[exe] tao_parser_test/CMake Rules</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>[Targets]/[exe] parse_code/Resources</name>
+			<name>[Targets]/[exe] tao_parser_test/Resources</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[exe] tao_parser_test/Object Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -254,6 +329,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>[Targets]/[lib] gtest/Object Files</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>[Targets]/[lib] gtest_main</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -285,6 +365,11 @@
 		</link>
 		<link>
 			<name>[Targets]/[lib] gtest_main/Resources</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>[Targets]/[lib] gtest_main/Object Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>

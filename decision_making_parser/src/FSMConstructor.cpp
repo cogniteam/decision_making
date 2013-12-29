@@ -78,13 +78,13 @@ void xml_call_task(std::ostream& out, std::string tab, std::string name, std::st
 }
 
 
-std::ostream& saveXml(std::ostream& out, const Rice& o){
+std::ostream& saveXml(std::ostream& out, const Raise& o){
 	xml_send(out, o.tab, o.text);
 	return out;
 }
 
 std::ostream& saveXml(std::ostream& out, const EventAction& o){
-	if(o.type=="rise"){
+	if(o.type=="raise"){
 		xml_send(out, o.tab, o.text);
 	}
 	return out;
@@ -117,10 +117,10 @@ std::ostream& saveXml(std::ostream& out, const States& o){
 	//o.lib->name_to_id[o.name].push_back(o.getId());
 	xml_state_bgn(out, o.tab, o.name, "", o.getId()); out<<endl;
 
-	if(not o.rises.empty()){
+	if(not o.raises.empty()){
 		string tab = o.tab+"   ";
 		xml_onentry_bgn(out, tab); out<<endl;
-		for(std::vector<Rice>::const_iterator i=o.rises.begin();i!=o.rises.end();i++){
+		for(std::vector<Raise>::const_iterator i=o.raises.begin();i!=o.raises.end();i++){
 			i->lib=o.lib;
 			i->tab=tab+"   ";
 			saveXml(out, *i)<<endl;
@@ -240,9 +240,9 @@ void saveXml(std::string path_prefix, const FSMConstructor& o){
 
 
 
-std::ostream& operator<<(std::ostream& out, const Rice& o){
+std::ostream& operator<<(std::ostream& out, const Raise& o){
 	return
-	out<<"            rise "<<" : "<<o.text;
+	out<<"            raise "<<" : "<<o.text;
 }
 
 std::ostream& operator<<(std::ostream& out, const EventAction& o){
@@ -271,8 +271,10 @@ std::ostream& operator<<(std::ostream& out, const States& o){
 		i->lib=o.lib;
 		out<<(*i)<<endl;
 	}
-	out<<"         rises:"<<endl;
-	for(std::vector<Rice>::const_iterator i=o.rises.begin();i!=o.rises.end();i++){
+	out<<"         raises:"<<endl;
+
+	for(std::vector<Raise>::const_iterator i=o.raises.begin();i!=o.raises.end();i++){
+
 		i->lib=o.lib;
 		out<<(*i)<<endl;
 	}

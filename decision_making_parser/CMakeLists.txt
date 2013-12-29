@@ -5,8 +5,8 @@ project(decision_making_parser)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp 
-)
+  roscpp  
+) 
  
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -16,11 +16,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
-
-################################################
+  
+################################################ 
 ## Declare ROS messages, services and actions ##
-################################################
-
+################################################  
+ 
 ## To declare and build messages, services or actions from within this
 ## package, follow these steps:
 ## * Let MSG_DEP_SET be the set of packages whose message types you use in
@@ -105,10 +105,25 @@ include_directories(
 ## Declare a cpp executable
 
 
-add_executable(decision_making_parser 
+add_executable(decision_making_parser
+    src/TAOConstructor.cpp 
+    src/Parsers_TAO.cpp  
 	src/BTConstructor.cpp
 	src/Constructors.cpp
 	src/decision_making_parser.cpp
+	src/FSMConstructor.cpp
+	src/Parsers_BT.cpp
+	src/Parsers_FSM.cpp
+	src/BTConstructor_for_Dot.cpp
+	src/FSMConstructor_for_Dot.cpp
+)
+
+add_executable(tao_parser_test
+    src/TAOParserTest.cpp
+    src/TAOConstructor.cpp
+    src/Parsers_TAO.cpp 
+	src/BTConstructor.cpp
+	src/Constructors.cpp
 	src/FSMConstructor.cpp
 	src/Parsers_BT.cpp
 	src/Parsers_FSM.cpp

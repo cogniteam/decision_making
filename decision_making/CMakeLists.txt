@@ -114,12 +114,12 @@ include_directories(
 #target_link_libraries(bt_example  ${catkin_LIBRARIES} )
 
 
-add_executable(hyb_example src/HybridExample.cpp)
-target_link_libraries(hyb_example ${catkin_LIBRARIES} )
+add_executable(tao_example src/TAOExample.cpp)
+target_link_libraries(tao_example ${catkin_LIBRARIES} )
 
 
-add_executable(mult_hyb_example src/multifiles/HybridExample.cpp)
-target_link_libraries(mult_hyb_example ${catkin_LIBRARIES} )
+#add_executable(mult_hyb_example src/multifiles/HybridExample.cpp)
+#target_link_libraries(mult_hyb_example ${catkin_LIBRARIES} )
 
 
 #===================== ROS =============================================

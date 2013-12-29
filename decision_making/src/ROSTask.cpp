@@ -111,7 +111,7 @@ TaskResult callTask(std::string task_address, const CallContext& call_ctx, Event
 
 		Event new_event ( Event(""+ MapResultEvent::map(task_name, ac.getResult()->success), call_ctx) );
 		DMDEBUG( cout<<" TASK("<<task_address<<":"<<new_event<<") "; )
-		events.riseEvent(new_event);
+		events.raiseEvent(new_event);
 
 		if(ac.getResult()->success==0){
 			return TaskResult::SUCCESS();
@@ -231,36 +231,22 @@ private:
 	}
 };
 
-ON_FUNCTION(on_fsm_start){
-	//cout<<"[on_fsm_start]"<<call_ctx.str()<<endl;
-	RosDiagnostic::get().publish(call_ctx.str(), type, "started", str(result));
-}
+#define IMPL_ON_FUNCTION(NAME, TEXT) \
+	ON_FUNCTION(NAME){\
+		/*cout<<"[on_fsm_start]"<<call_ctx.str()<<endl;*/\
+		RosDiagnostic::get().publish(call_ctx.str(), type, #TEXT, str(result));\
+	}
 
-ON_FUNCTION(on_fsm_end){
-	//cout<<"[on_fsm_end]"<<call_ctx.str()<<endl;
-	RosDiagnostic::get().publish(call_ctx.str(), type, "stopped", str(result));
-}
-
-
-ON_FUNCTION(on_fsm_state_start){
-	//cout<<"[on_fsm_state_start]"<<call_ctx.str()<<endl;
-	RosDiagnostic::get().publish(call_ctx.str(), type, "started", str(result));
-}
-ON_FUNCTION(on_fsm_state_end){
-	//cout<<"[on_fsm_state_end]"<<call_ctx.str()<<endl;
-	RosDiagnostic::get().publish(call_ctx.str(), type, "stopped", str(result));
-}
-
-
-ON_FUNCTION(on_bt_node_start){
-	//cout<<"[on_bt_node_start]"<<call_ctx.str()<<endl;
-	RosDiagnostic::get().publish(call_ctx.str(), type, "started", str(result));
-}
-ON_FUNCTION(on_bt_node_end){
-	//cout<<"[on_bt_node_end]"<<call_ctx.str()<<endl;
-	RosDiagnostic::get().publish(call_ctx.str(), type, "stopped", str(result));
-}
-
+IMPL_ON_FUNCTION(on_fsm_start, started)
+IMPL_ON_FUNCTION(on_fsm_end, stopped)
+IMPL_ON_FUNCTION(on_fsm_state_start, started)
+IMPL_ON_FUNCTION(on_fsm_state_end, stopped)
+IMPL_ON_FUNCTION(on_bt_node_start, started)
+IMPL_ON_FUNCTION(on_bt_node_end, stopped)
+IMPL_ON_FUNCTION(on_tao_tree_start, started)
+IMPL_ON_FUNCTION(on_tao_tree_end, stopped)
+IMPL_ON_FUNCTION(on_tao_plan_start, started)
+IMPL_ON_FUNCTION(on_tao_plan_end, stopped)
 
 std::string RosConstraints::preproc(std::string txt)const{
 	std::stringstream source(txt);
@@ -312,9 +298,9 @@ RosEventQueue::RosEventQueue(EventQueue* parent, bool isTransit):decision_making
 void RosEventQueue::onNewEvent(const std_msgs::String::ConstPtr& msg){
 	//cout<<"RosEventQueue:onNewEvent: "<<msg->data<<endl;
 	decision_making::Event e(msg->data);
-	decision_making::EventQueue::riseEvent(e);
+	decision_making::EventQueue::raiseEvent(e);
 }
-void RosEventQueue::riseEvent(const decision_making::Event& e){
+void RosEventQueue::raiseEvent(const decision_making::Event& e){
 	std_msgs::String::Ptr msg(new std_msgs::String());
 	msg->data = e._name;
 	publisher.publish(msg);
@@ -334,7 +320,7 @@ void ros_decision_making_init(int &argc, char **argv){
 	RosDiagnostic::get();
 	RosConstraints::getAdder();
 	RosConstraints::getRemover();
-	ros::Rate sl(1); sl.sleep();
+	boost::this_thread::sleep(boost::posix_time::seconds(1.0));
 }
 
 

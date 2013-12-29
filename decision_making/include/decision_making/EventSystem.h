@@ -15,6 +15,7 @@
 #include <boost/thread/condition.hpp>
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
+#include <boost/bind.hpp>
 
 namespace decision_making{
 	using namespace std;
@@ -23,7 +24,7 @@ class CallContextParameters{
 public:
 		virtual ~CallContextParameters(){}
 		typedef boost::shared_ptr<CallContextParameters> Ptr;
-		virtual std::string str()=0;
+		virtual std::string str()const=0;
 };
 struct CallContext{
 private:
@@ -113,12 +114,17 @@ struct Event{
 	bool isUndefined()const{ return _name.size()==0; }
 	bool isDefined()const{ return not isUndefined(); }
 	bool isRegEx()const{ return _name.size()>0 and _name[0]=='@'; }
-	bool operator==(const Event& e){
-		if(e.isRegEx() and !isRegEx()) return e.regex(_name);
-		if(isRegEx() and !e.isRegEx()) return regex(e._name);
+	bool equals(const Event& e)const{
+		if(e.isRegEx() and !isRegEx()){ return e.regex(_name); }
+		if(isRegEx() and !e.isRegEx()){ return regex(e._name); }
 		return _name==e._name;
 	}
-	bool operator!=(const Event& e){ return !(e==(*this)); }
+	bool operator==(const Event& e)const{
+		return equals(e);
+	}
+	bool operator!=(const Event& e)const{
+		return not equals(e);
+	}
 	operator bool()const{ return isDefined(); }
 
 	bool regex(std::string text)const{
@@ -126,6 +132,7 @@ struct Event{
 		boost::regex e(_name.substr(1));
 		return regex_match(text, e);
 	}
+	static Event SPIN_EVENT(){ return Event("/SPIN"); }
 };
 inline std::ostream& operator<<(std::ostream& o, Event t){
 	return o<<"E["<<t.name()<<']';
@@ -140,18 +147,26 @@ private:
 	bool events_system_stop;
 	std::deque<EventQueue*> subs;
 	EventQueue* parent;
+	int max_unreaded_events_number;
+	static const int max_unreaded_events_number_dif=1000;
+#	define MUEN max_unreaded_events_number(max_unreaded_events_number_dif)
 public:
-	EventQueue(EventQueue* parent):isTransit(false),events_system_stop(false),parent(parent){
-		if(parent)
+	EventQueue(EventQueue* parent):isTransit(false),events_system_stop(false),parent(parent),MUEN{
+		if(parent){
+			max_unreaded_events_number = parent->max_unreaded_events_number;
 			parent->subscribe(this);
+		}
 	}
-	EventQueue(EventQueue* parent, bool isTransit):isTransit(isTransit), events_system_stop(false),parent(parent){
-		if(parent)
+	EventQueue(EventQueue* parent, bool isTransit):isTransit(isTransit), events_system_stop(false),parent(parent),MUEN{
+		if(parent){
+			max_unreaded_events_number = parent->max_unreaded_events_number;
 			parent->subscribe(this);
+		}
 	}
-	EventQueue():isTransit(false),events_system_stop(false),parent(NULL){
-
+	EventQueue(int muen = max_unreaded_events_number_dif):isTransit(false),events_system_stop(false),parent(NULL),MUEN{
+		max_unreaded_events_number = (muen);
 	}
+#	undef MUEN
 	virtual ~EventQueue(){
 		if(parent)
 			parent->remove(this);
@@ -164,17 +179,36 @@ public:
 		}
 	}
 
-	virtual void riseEvent(const Event& e){
-		if(parent) parent->riseEvent(e);
+	virtual void raiseEvent(const Event& e){
+		if(parent) parent->raiseEvent(e);
 		else addEvent(e);
 	}
+
+	//Deprecated
+	virtual void riseEvent(const Event& e){ raiseEvent(e); }
+
 private:
 	void addEvent(Event e){
 		boost::mutex::scoped_lock l(events_mutex);
-		if(not isTransit)
-			events.push_back(e);
+		bool notify = true;
+		if(not isTransit){
+			if(events.empty()){
+				//cout<<"E("<<e<<")";
+				events.push_back(e);
+			}else{
+				if(e==Event::SPIN_EVENT()){
+					notify = false;
+				}else{
+					if(events.size() > max_unreaded_events_number){
+						events.pop_front();
+					}
+					//cout<<"E("<<e<<")";
+					events.push_back(e);
+				}
+			}
+		}
 		BOOST_FOREACH(EventQueue* sub, subs) sub->addEvent(e);
-		on_new_event.notify_one();
+		if(notify) on_new_event.notify_one();
 	}
 public:
 	Event waitEvent(){
@@ -230,6 +264,42 @@ public:
 		return events_system_stop;
 	}
 	typedef boost::shared_ptr<EventQueue> Ptr;
+#define EQ_SPINNER_DIF_RATE 10
+	class Spinner{
+		friend class EventQueue;
+		EventQueue& events;
+		Spinner(EventQueue& events):events(events){}
+		boost::thread_group threads;
+		void spinOne(){
+			events.riseEvent(Event::SPIN_EVENT());
+			//cout<<"[spin]"<<endl;
+		}
+		void spin(double rate = EQ_SPINNER_DIF_RATE){
+			while(events.check_external_ok() and not events.isTerminated()){
+				spinOne();
+				boost::this_thread::sleep(boost::posix_time::seconds(1.0/rate));
+			}
+			if(not events.check_external_ok() and not events.isTerminated()){
+				events.close();
+			}
+		}
+		void start(double rate = EQ_SPINNER_DIF_RATE){
+			threads.add_thread(new boost::thread(boost::bind(&EventQueue::Spinner::spin, this, rate)));
+		}
+	public:
+		~Spinner(){ if(events.check_external_ok()) threads.join_all(); }
+	};
+
+	virtual bool check_external_ok(){return true;}
+	void spinOne(){ Spinner s(*this); s.spinOne(); }
+	void spin(double rate=EQ_SPINNER_DIF_RATE){ Spinner s(*this); s.spin(rate); }
+	void async_spin(double rate=EQ_SPINNER_DIF_RATE, double start_delay=0.0){
+		boost::this_thread::sleep(boost::posix_time::seconds(start_delay));
+		_spinner = boost::shared_ptr<Spinner>(new Spinner (*this));
+		_spinner->start(rate);
+	}
+private:
+	boost::shared_ptr<Spinner> _spinner;
 };
 
 

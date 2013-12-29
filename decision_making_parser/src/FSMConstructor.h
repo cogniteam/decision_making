@@ -27,7 +27,7 @@ public:
 	Element():lib(0){}
 };
 
-class Rice:public Element{
+class Raise:public Element{
 public:
 	std::string text;
 };
@@ -63,7 +63,9 @@ public:
 	mutable std::string id;
 	std::string name;
 	std::vector<Call> calls;
-	std::vector<Rice> rises;
+
+	std::vector<Raise> raises;
+
 	std::vector<OnEvent> events;
 
 	std::deque<OnEvent> stack_events;
@@ -100,7 +102,7 @@ public:
 	std::string getId()const{ return id+"/"+name; }
 };
 
-class FSMConstructor : public Element, public Container{
+class FSMConstructor : public Element, public Container {
 public:
 	std::map<std::string, Fsm> fsms;
 	std::deque<Fsm> stack;
@@ -168,7 +170,7 @@ public:
 
 //==========================================================================
 
-std::ostream& operator<<(std::ostream& out, const Rice& o);
+std::ostream& operator<<(std::ostream& out, const Raise& o);
 
 std::ostream& operator<<(std::ostream& out, const EventAction& o);
 
@@ -185,7 +187,7 @@ std::ostream& operator<<(std::ostream& out, const Call& o);
 
 //======================================================================
 
-std::ostream& saveXml(std::ostream& out, const Rice& o);
+std::ostream& saveXml(std::ostream& out, const Raise& o);
 
 std::ostream& saveXml(std::ostream& out, const EventAction& o);
 
@@ -204,7 +206,7 @@ void saveXml(std::string prefix, const FSMConstructor& o);
 
 //======================================================================
 
-std::ostream& saveDot(std::ostream& out, const Rice& o);
+std::ostream& saveDot(std::ostream& out, const Raise& o);
 
 std::ostream& saveDot(std::ostream& out, const EventAction& o);
 

@@ -1,21 +1,47 @@
-from __future__ import division
+"""
+Copyright (c) 2013, Cogniteam
+All rights reserved.
 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+*   Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+*   Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+*   Neither the name of the Cogniteam nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+from __future__ import division
 from os import path
 from threading import Lock
-
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt
 from python_qt_binding.QtGui import QFileDialog, QGraphicsScene, QIcon, QImage, QPainter, QWidget, QColor, QComboBox
-
 from .interactive_graphics_view import InteractiveGraphicsView
 from .decision_graph import DecisionGraph
 from .graph import Graph, GraphParseException
 from .dot_to_qt import DotToQtGenerator
 from .dmg_item_factory import DmgItemFactory
-from .graph_item_factory import GraphItemFactory
-from .hovered_item_factory import HoveredGraphItemFactory
 
 from .dot_processor import DotProcessor
+
 
 class GraphWidget(QWidget):
     @staticmethod
@@ -88,17 +114,6 @@ class GraphWidget(QWidget):
         if file_path is None or file_path == '':
             return
 
-        dot_data = None
-
-        try:
-            with open(file_path, 'r') as file_handler:
-                dot_data = file_handler.read()
-        except IOError:
-            print 'Fail, epic fail'
-            return
-
-        # self._dot_processor.process(dot_data)
-
         custom_graph = Graph(self._dot_processor, file_path, file_path)
         self.decision_graphs[custom_graph.source] = custom_graph
         self._current_graph = custom_graph
@@ -142,8 +157,8 @@ class GraphWidget(QWidget):
         is_updated = False
         if self._current_graph is not None:
             for node in self._current_graph.nodes.values():
-                print node.url, name
-                if name == node.url:
+                print node.url, '==',  name, ' => ', (name[:len(node.url)] == node.url)
+                if name[:len(node.url)] == node.url:
                     node.highlight(True) if 'started' == status else node.highlight(False)
                     is_updated = True
         self._lock.release()

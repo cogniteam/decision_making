@@ -43,6 +43,104 @@ class NodeShape:
 		node.set_fillcolor(self.nfillcolor)
 		#node.set_penwidth(self.npenwidth)
 
+
+def get_tao_start(tao_node):
+	return tao_node.attrib["start"]
+
+def get_plan_details(plan_node):
+	
+	start_condition = "none"
+	stop_condition = "none"
+	allocate_protocol = "empty"
+	next_protocol = "empty"
+	
+	for subnode in plan_node:
+		if subnode.tag == "tao_start_condition":
+			start_condition = subnode.text
+		if subnode.tag == "tao_stop_condition":
+			stop_condition = subnode.text
+		if subnode.tag == "tao_allocate":
+			allocate_protocol = subnode.attrib["protocol"]
+		if subnode.tag == "tao_next":
+			next_protocol = subnode.attrib["protocol"]
+			
+			 
+	return (start_condition, stop_condition, allocate_protocol, next_protocol)
+
+
+def gen_tao(node, graph):
+	graph.add_node(pydot.Node("tao_root", label=" ", shape="point"))
+	gen_tao_nodes(node, graph)
+	graph.add_edge(pydot.Edge("tao_root", get_tao_start(node)))
+
+def gen_tao_nodes(node, graph):
+	plans = node[0]
+	block = pydot.Subgraph('', rank="same")
+	
+	for plan in plans:
+		(start_condition, stop_condition, allocate_protocol, next_protocol) = get_plan_details(plan)
+		import cgi
+		
+		label_content = """<
+		<table border='1' width='100px' style='widht: 100px !important;'>
+			<tr>
+				<td colspan="2">
+					{planName}
+				</td>
+			</tr>
+			<tr>
+				<td>{startCondition}</td>
+				<td>{stopCondition}</td>
+			</tr>
+			<tr>
+				<td>{allocateProtocol}</td>
+				<td>{nextProtocol}</td>
+			</tr>
+		</table>
+		>""".format(
+				planName = plan.attrib["name"], 
+				startCondition = cgi.escape(start_condition), 
+				stopCondition = cgi.escape(stop_condition), 
+				allocateProtocol = allocate_protocol, 
+				nextProtocol = next_protocol)
+		
+		plan_node = pydot.Node(str(plan.attrib["id"]), shape="rectangle", label=label_content, URL=plan.attrib["id"])
+		block.add_node(plan_node)
+	
+	graph.add_subgraph(block)
+	gen_tao_edges(node, graph)
+	
+	for plan in plans:
+		for plan_subnode in plan:
+			if plan_subnode.tag == 'tao_allocate':
+				for subtao in plan_subnode:
+					gen_tao_nodes(subtao, graph)
+	
+	
+def gen_tao_edges(node, graph):
+	plans = node[0]
+	
+	#===========================================================================
+	# Next edges
+	#===========================================================================
+	for plan in plans:
+		for plan_subnode in plan:
+			if plan_subnode.tag == 'tao_next':
+				for next_op in plan_subnode:
+					edge = pydot.Edge(plan.attrib["id"], next_op.attrib["name"])
+					graph.add_edge(edge)
+					
+	#===========================================================================
+	# Alloc edges
+	#===========================================================================
+	for plan in plans:
+		for plan_subnode in plan:
+			if plan_subnode.tag == 'tao_allocate':
+				for subtao in plan_subnode:
+					edge = pydot.Edge(plan.attrib["id"], get_tao_start(subtao))
+					graph.add_edge(edge)
+		
+
 def graph_gen_nodes(xml, node, graph, elem, ids):
 	#print 'proc',node.tag, node.attrib['name'] if 'name' in node.attrib else ""
 	if node.tag in ['scxml']:
@@ -88,6 +186,24 @@ def graph_gen_nodes(xml, node, graph, elem, ids):
 			elem.add_subgraph(gr_cluster)
 			for chnode in node.findall('scxml'):
 				graph_gen_nodes(xml, chnode, graph, gr_cluster, ids)
+				
+	#===========================================================================
+	# TAO
+	#===========================================================================
+	
+	if node.tag in ['tao']:
+		gen_tao(node, graph)
+		
+# 	if node.tag in ['tao', 'tao_plans']:
+# 		for chnode in node:
+# 			graph_gen_nodes(xml, chnode, graph, elem, ids)
+# 			
+# 	if node.tag in ['tao_plan']:
+# 		gr_node=pydot.Node(ids[node.attrib["id"]], label=node.attrib["name"], URL=node.attrib["id"])
+# 		shape = NodeShape(node.tag)
+# 		shape.set(gr_node)
+# 		elem.add_node(gr_node)
+		
 
 def find_simple_node(state):
 	if state.tag == "state" and len([x for x in state if x.tag!='transition'])==0 : return state.attrib["id"]
@@ -170,7 +286,20 @@ def graph_gen_edges(xml, node, graph, elem, ids, fsm=None):
 			#gr_edge.set_ltail(ids[src_state_id])
 			graph.add_edge(gr_edge)		
 			graph_gen_edges(xml, chnode, graph, elem, ids, fsm)
+			
+			
+	#===========================================================================
+	# TAO
+	#===========================================================================
 	
+	if node.tag in ['tao']:
+		for chnode in node:
+			graph_gen_edges(xml, chnode, graph, elem, ids, node)
+			
+	if node.tag in ['tao_plans']:
+		for chnode in node:
+			graph_gen_edges(xml, chnode, graph, elem, ids, node)
+		
 				
 
 if __name__ == '__main__':
@@ -207,7 +336,10 @@ if __name__ == '__main__':
 				for k,v in map_ids.items(): print k,":",v
 			graph_gen_nodes(xml, xml, graph, graph, map_ids)
 			graph_gen_edges(xml, xml, graph, graph, map_ids)
-			graph.write_raw(args[1] + os.sep + fileName[:-len("XXxml")] + "dot")
+			
+			(fname, fextension) = os.path.splitext(os.path.basename(fileName))
+			
+			graph.write_raw(args[1] + os.sep + fname + ".dot")
 	except:
 		print "  -- Unexpected error (",fileXML,"):", sys.exc_info()
 		import traceback

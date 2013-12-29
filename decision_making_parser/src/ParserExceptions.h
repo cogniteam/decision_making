@@ -14,13 +14,28 @@
 #include <string.h>
 #include <errno.h>
 
+using namespace std;
+
 class ParserException{
 protected:
-	ParserException(std::string desc=""):desc(desc){};
+    int _line;
+    int _position;
+
+	ParserException(std::string desc="", int line = 0, int position = 0)
+        : desc(desc), _line(line), _position(position) { };
 	virtual ~ParserException(){};
 	std::string desc;
 public:
-	std::string what()const{ return desc; }
+	std::string what() const {
+	    stringstream ss;
+	    ss << desc;
+
+	    if (_line > 0 && _position > 0)
+	        ss << endl << "Line: " << _line << ", position: " << _position;
+
+	    return ss.str();
+	}
+
 	template <class A>
 	ParserException& operator<<(const A& a){
 		std::stringstream s;
@@ -28,6 +43,23 @@ public:
 		desc += s.str();
 		return *this;
 	}
+};
+
+class UnexpectedEndOfFile : public ParserException {
+public:
+    UnexpectedEndOfFile(string expectedString = "", int line = 0, int position = 0)
+        : ParserException("Expected string '" + expectedString + "' not found", line, position) { }
+};
+
+class ClosingBracketNotFound : public ParserException {
+public:
+    ClosingBracketNotFound() : ParserException("Closing bracket not found") { }
+};
+
+class UnexpectedToken: public ParserException {
+public:
+    UnexpectedToken(string character, string expectedToken = "", int line = 0, int position = 0)
+        : ParserException("Unexpected character: '" + character + "', expected: '" + expectedToken + "'", line, position) { }
 };
 
 class PEFileNotFound:public ParserException{

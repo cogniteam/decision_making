@@ -241,10 +241,12 @@ typedef BTNode CurrentNodeType;
 						bt_node_return_value = Fsm##NAME(&call_ctx, &events);\
 					__BT_END_TASK(NAME)
 
-#define BT_RISE(EVENT) \
-			DMDEBUG( cout<<" RISE("<<node_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
-			events.riseEvent(decision_making::Event(#EVENT, call_ctx));
+#define BT_RAISE(EVENT) \
+			DMDEBUG( cout<<" RAISE("<<node_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
+			events.raiseEvent(decision_making::Event(#EVENT, call_ctx));
 
+//Deprecated
+#define BT_RISE(EVENT) BT_RAISE(EVENT)
 
 #if USE_SHORT_BT_SYNTAX
 

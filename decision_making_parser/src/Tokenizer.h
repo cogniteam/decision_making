@@ -78,17 +78,19 @@ template<class TokenType, class Init>
 class Tokenizer:public TokenizerData<TokenType>{
 public:
 	Init p;
+	bool in_string;
+	bool prev_slash;
 
 	template<class T,class B>
 	bool contains(const map<T,B>& m, const T& t){ return m.find(t)!=m.end(); }
-	Tokenizer(){
+	Tokenizer():in_string(false), prev_slash(false){
 		p.init(*this);
 	}
 	void searchToken(size_t index, stringstream& buf, size_t& start_index, char c, TokenStream<TokenType>& tkn_stream){
 	    const bool verb = false;
 	    if(verb) cout<<"Proc ["<<str(c)<<"]"<<endl;
 	    Token<TokenType> tkn;
-	    if( p.isDelimiter(c) ){
+	    if( (!in_string and p.isDelimiter(c)) or (in_string and c=='\"' and !prev_slash) ){
 	        if(verb) cout<<"... is delimiter"<<endl;
 	        if(contains(this->string_token, buf.str())){
 	            if(verb) cout<<"... ... token found"<<endl;
@@ -116,12 +118,17 @@ public:
 	            tkn.end = index+1;
 	            tkn_stream<<tkn;
 	        }
+            if( c == '\"' ){
+                in_string = !in_string;
+            }
+
 	        start_index+=1;
 	    }else{
 	        if(verb) cout<<"... is not delimiter"<<endl;
 	        buf<<c;
 	    }
 	    if(verb) cout<<"... current buffer is ["<<buf.str()<<"]"<<endl;
+        prev_slash = c == '\\';
 	}
 };
 

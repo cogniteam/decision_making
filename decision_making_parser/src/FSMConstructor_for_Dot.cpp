@@ -18,7 +18,7 @@
 namespace fsm_constructor{
 using namespace std;
 
-std::ostream& saveDot(std::ostream& out, const Rice& o){
+std::ostream& saveDot(std::ostream& out, const Raise& o){
 	return out;
 }
 

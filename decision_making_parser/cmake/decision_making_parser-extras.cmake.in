@@ -63,13 +63,13 @@ macro(decision_making_parsing _SRC_FILE_LIST)
  
 			"execute_process(COMMAND ${PARSER} -pe -xml -dot -src \"${CMAKE_CURRENT_SOURCE_DIR}\" -dst \"${SHARE_DIR_NAME}\" -f \"${_CPPFILES}\" RESULT_VARIABLE rv)" "\n" 
 
-			"FILE(GLOB_RECURSE CREATED_FILES RELATIVE ${SHARE_DIR_NAME}/ ${SHARE_DIR_NAME}/*.scxml ${SHARE_DIR_NAME}/*.btxml)" "\n"
+			"FILE(GLOB_RECURSE CREATED_FILES RELATIVE ${SHARE_DIR_NAME}/ ${SHARE_DIR_NAME}/*.scxml ${SHARE_DIR_NAME}/*.btxml  ${SHARE_DIR_NAME}/*.taoxml)" "\n"
 			"message(\"   -- Created XML files:\")" "\n"
 			"foreach( f " "$" "{" "CREATED_FILES" "}" ")" "\n"
 			"     message(\"      -- " "$" "{" "f" "}" " \")" "\n"
 			"endforeach()" "\n"
 
-			"FILE(GLOB_RECURSE CREATED_FILES_ABS ${SHARE_DIR_NAME}/*.scxml ${SHARE_DIR_NAME}/*.btxml)" "\n"
+			"FILE(GLOB_RECURSE CREATED_FILES_ABS ${SHARE_DIR_NAME}/*.scxml ${SHARE_DIR_NAME}/*.btxml ${SHARE_DIR_NAME}/*.taoxml)" "\n"
 
 			"execute_process(COMMAND \"python\" ${XMLPARSER} -i \"${CMAKE_CURRENT_SOURCE_DIR}\" \"${SHARE_DIR_NAME}\" \"""$""{""CREATED_FILES_ABS""}""\" RESULT_VARIABLE rv)" "\n" 
 

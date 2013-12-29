@@ -10,26 +10,31 @@
 #include "Parsers.h"
 #include "ParserExceptions.h"
 #include <sstream>
+
 using namespace std;
 
 #define CREATE_PARSERS \
 	BTParser* btparser = 0;\
 	FSMParser* fsmparser = 0;\
+	TAOParser* taoparser = 0;\
 	struct GC{\
 		BTParser*& btparser;\
 		FSMParser*& fsmparser;\
+		TAOParser*& taoparser;\
 		std::string file;\
-		GC(BTParser*& btparser, FSMParser*& fsmparser, std::string file):\
-			btparser(btparser), fsmparser(fsmparser), file(file)\
+		GC(BTParser*& btparser, FSMParser*& fsmparser, TAOParser*& taoparser, std::string file):\
+			btparser(btparser), fsmparser(fsmparser), taoparser(taoparser), file(file)\
 		{\
 			btparser = createBT(file);\
 			fsmparser = createFSM(file);\
+			taoparser = createTAO(file);\
 		}\
 		~GC(){\
 			del(btparser);\
 			del(fsmparser);\
+			del(taoparser);\
 		}\
-	} gc(btparser, fsmparser, file);
+	} gc(btparser, fsmparser, taoparser, file);
 
 bool parseToXml(std::ostream& parsing_result, std::ostream& errors, std::string file){
 
@@ -40,6 +45,7 @@ bool parseToXml(std::ostream& parsing_result, std::ostream& errors, std::string 
 
 		fsm_constructor::FSMConstructor& fsm = parseFSM(fsmparser);
 		bt_constructor::BTConstructor& bt = parseBT(btparser);
+		tao_constructor::TAOConstructor& tao = parseTAO(taoparser);
 
 		//set cross links from different types of parses
 		fsm.trees = &bt;
@@ -48,9 +54,11 @@ bool parseToXml(std::ostream& parsing_result, std::ostream& errors, std::string 
 		xml_version(parsing_result, ""); parsing_result<<std::endl;
 		fsm_constructor::saveXml(parsing_result, fsm)<<std::endl;
 		bt_constructor::saveXml(parsing_result, bt)<<std::endl;
+		tao_constructor::saveXml(parsing_result, tao)<<std::endl;
 
 		errors << fsm.errors.str();
 		errors << bt.errors.str();
+		errors << tao.errors.str();
 
 	}catch(const PEFileNotFound& err){
 		errors << err.what() << std::endl;
@@ -68,6 +76,7 @@ bool parseToXml(std::string result_prefix, std::ostream& errors, std::string fil
 
 		fsm_constructor::FSMConstructor& fsm = parseFSM(fsmparser);
 		bt_constructor::BTConstructor& bt = parseBT(btparser);
+		tao_constructor::TAOConstructor& tao = parseTAO(taoparser);
 
 		//set cross links from different types of parses
 		fsm.trees = &bt;
@@ -75,9 +84,11 @@ bool parseToXml(std::string result_prefix, std::ostream& errors, std::string fil
 
 		fsm_constructor::saveXml(result_prefix, fsm);
 		bt_constructor::saveXml(result_prefix, bt);
+		tao_constructor::saveXml(result_prefix, tao);
 
 		errors << fsm.errors.str();
 		errors << bt.errors.str();
+		errors << tao.errors.str();
 
 	}catch(const PEFileNotFound& err){
 		errors << err.what() << std::endl;
