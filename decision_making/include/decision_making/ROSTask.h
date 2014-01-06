@@ -139,6 +139,7 @@ private:
 class RosEventQueue:public decision_making::EventQueue{
 	ros::Publisher publisher;
 	ros::Subscriber subscriber;
+	bool do_not_publish_spin;
 public:
 	RosEventQueue();
 	RosEventQueue(EventQueue* parent);
@@ -147,6 +148,8 @@ public:
 	void onNewEvent(const std_msgs::String::ConstPtr& msg);
 	virtual void raiseEvent(const decision_making::Event& e);
 	virtual bool check_external_ok(){return ros::ok();}
+
+	void publish_spin_event(){ do_not_publish_spin = false; }
 };
 
 }

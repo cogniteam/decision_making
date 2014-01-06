@@ -34,6 +34,7 @@ from threading import Lock
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt
 from python_qt_binding.QtGui import QFileDialog, QGraphicsScene, QIcon, QImage, QPainter, QWidget, QColor, QComboBox
+from collections import namedtuple
 from .interactive_graphics_view import InteractiveGraphicsView
 from .decision_graph import DecisionGraph
 from .graph import Graph, GraphParseException
@@ -84,6 +85,7 @@ class GraphWidget(QWidget):
         self._dot_processor = DotProcessor(self._dot_to_qt)
 
         self.decision_graphs = dict()
+        self.states = dict()
 
     def update(self, message):
         data = self._get_data_from_message(message)
@@ -95,12 +97,15 @@ class GraphWidget(QWidget):
                 print 'INFO: Graph has been added'
             except GraphParseException as ex:
                 print 'ERROR: Failed to load graph: %s', ex.message
-        elif self.decision_graphs[key].graph_id != message.status[0].values[-1].value:
-            self.decision_graphs[key].graph_id = message.status[0].values[-1].value
-            print 'INFO: Graph id has been changed'
-        elif self._current_graph == self.decision_graphs[key]:
-            if not self._update_graph(data['name'], data['status']):
-                print 'WARNING: Failed to find appropriate graph for update'
+        else:
+            self.states[key] = data['name'], data['status']
+
+            if self.decision_graphs[key].graph_id != message.status[0].values[-1].value:
+                self.decision_graphs[key].graph_id = message.status[0].values[-1].value
+                print 'INFO: Graph id has been changed'
+            elif self._current_graph == self.decision_graphs[key]:
+                if not self._update_graph(data['name'], data['status']):
+                    print 'WARNING: Failed to find appropriate graph for update'
 
     def _load_ui(self, ros_package):
         user_interface_file = path.join(ros_package.get_path('rqt_decision_graph'), 'resource', 'DecisionGraph.ui')
@@ -145,19 +150,25 @@ class GraphWidget(QWidget):
                                        data['node_run_id'],
                                        data['node_name'],
                                        data['node_exe_file'],
-                                       self._dot_processor)
+                                       self._dot_processor,
+                                       key)
 
         self.decision_graphs[key] = decision_graph
         self.decision_graphs_combo_box.addItem(key)
 
         self._lock.release()
 
+    def _reset_graph_state(self, name, status):
+        if self._current_graph is not None:
+            for node in self._current_graph.nodes.values():
+                if name[:len(node.url)] == node.url:
+                    node.highlight(True) if 'started' == status else node.highlight(False)
+
     def _update_graph(self, name, status):
         self._lock.acquire()
         is_updated = False
         if self._current_graph is not None:
             for node in self._current_graph.nodes.values():
-                print node.url, '==',  name, ' => ', (name[:len(node.url)] == node.url)
                 if name[:len(node.url)] == node.url:
                     node.highlight(True) if 'started' == status else node.highlight(False)
                     is_updated = True
@@ -171,6 +182,12 @@ class GraphWidget(QWidget):
             self._current_graph = self.decision_graphs[event]
             self._redraw_graph_view()
             self._fit_to_view()
+
+            if isinstance(self._current_graph, DecisionGraph):
+                state = self.states.get(self._current_graph.key, None)
+                if state is not None:
+                    self._reset_graph_state(state[0], state[1])
+
         self._lock.release()
 
     def _get_data_from_message(self, message):

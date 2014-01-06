@@ -248,6 +248,8 @@ public:
 			} void r(){}\
 		}_e(plan_name, call_ctx, *events_queue, justCondition);_e.r();
 
+#define TAO_CONTEXT plan_call_ctx
+
 #define TAO_PLAN(X)  \
 			}}}break; \
 			case X: { \

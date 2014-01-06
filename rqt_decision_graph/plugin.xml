@@ -4,7 +4,7 @@
       Decision graph visualizer
     </description>
     <qtgui>
-      <label>Decision Graph Plugin</label>
+      <label>Decision Graph</label>
       <icon type="theme">preferences-system-network</icon>
       <statustip>A Python GUI plugin to visualize a Decision Making graph.</statustip>
     </qtgui>

@@ -162,8 +162,11 @@ typedef BTNode CurrentNodeType;
 #define BT_RUN_LAST_NODE BT_LAST_NODE->run()
 #define BT_RUN_NODE(NAME) BT_NODE(NODE)->run()
 
-#define BT_RENAME_CONTEXT(NEW_NAME) typedef BTContext NEW_NAME##Type; NEW_NAME##Type& NEW_NAME=context;
-#define BT_NEW_CONTEXT(...) struct BTContext{__VA_ARGS__} context
+#define BT_RENAME_INNER_CONTEXT(NEW_NAME) typedef BTContext NEW_NAME##Type; NEW_NAME##Type& NEW_NAME=context;
+#define BT_NEW_INNER_CONTEXT(...) struct BTContext{__VA_ARGS__} context
+
+#define BT_CONTEXT calls
+#define BT_INNER_CONTEXT context
 
 #define BT_CALL_BT(NAME) \
 		BT_NODE_PTR(NAME) BT_NODE(NAME)((BTNode*)new BT_NODE_TYPE(NAME)(this, context, call_ctx, events));\

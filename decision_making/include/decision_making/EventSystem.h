@@ -25,6 +25,7 @@ public:
 		virtual ~CallContextParameters(){}
 		typedef boost::shared_ptr<CallContextParameters> Ptr;
 		virtual std::string str()const=0;
+
 };
 struct CallContext{
 private:
@@ -193,16 +194,13 @@ private:
 		bool notify = true;
 		if(not isTransit){
 			if(events.empty()){
-				//cout<<"E("<<e<<")";
 				events.push_back(e);
 			}else{
 				if(e==Event::SPIN_EVENT()){
-					notify = false;
 				}else{
 					if(events.size() > max_unreaded_events_number){
 						events.pop_front();
 					}
-					//cout<<"E("<<e<<")";
 					events.push_back(e);
 				}
 			}

@@ -282,7 +282,7 @@ std::string RosConstraints::preproc(std::string txt)const{
 	return result.str();
 }
 
-RosEventQueue::RosEventQueue():decision_making::EventQueue(){
+RosEventQueue::RosEventQueue():decision_making::EventQueue(), do_not_publish_spin(true){
 	std::string node_name = ros::this_node::getName();
 	std::string topic_name = "/decision_making/"+node_name+"/events";
 	publisher = ros::NodeHandle().advertise<std_msgs::String>(topic_name, 100);
@@ -290,9 +290,9 @@ RosEventQueue::RosEventQueue():decision_making::EventQueue(){
 	subscriber= ros::NodeHandle().subscribe<std_msgs::String>(topic_name, 100, &RosEventQueue::onNewEvent, this);
 	{boost::this_thread::sleep(boost::posix_time::seconds(1.0));}
 }
-RosEventQueue::RosEventQueue(EventQueue* parent):decision_making::EventQueue(parent){
+RosEventQueue::RosEventQueue(EventQueue* parent):decision_making::EventQueue(parent), do_not_publish_spin(true){
 }
-RosEventQueue::RosEventQueue(EventQueue* parent, bool isTransit):decision_making::EventQueue(parent,isTransit){
+RosEventQueue::RosEventQueue(EventQueue* parent, bool isTransit):decision_making::EventQueue(parent,isTransit), do_not_publish_spin(true){
 }
 
 void RosEventQueue::onNewEvent(const std_msgs::String::ConstPtr& msg){
@@ -301,6 +301,10 @@ void RosEventQueue::onNewEvent(const std_msgs::String::ConstPtr& msg){
 	decision_making::EventQueue::raiseEvent(e);
 }
 void RosEventQueue::raiseEvent(const decision_making::Event& e){
+	if( do_not_publish_spin and e.equals(Event::SPIN_EVENT()) ){
+		decision_making::EventQueue::raiseEvent(e);
+		return;
+	}
 	std_msgs::String::Ptr msg(new std_msgs::String());
 	msg->data = e._name;
 	publisher.publish(msg);

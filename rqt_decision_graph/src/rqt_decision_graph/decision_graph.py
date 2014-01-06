@@ -33,12 +33,13 @@ from .graph import Graph
 
 class DecisionGraph(Graph):
 
-    def __init__(self, name, graph_id, node_name, node_exe, dot_processor, parent=None):
+    def __init__(self, name, graph_id, node_name, node_exe, dot_processor, key, parent=None):
         super(DecisionGraph, self).__init__(dot_processor=dot_processor, source=None, parent=parent)
         self.name = name
         self.graph_id = graph_id
         self.node_name = node_name
         self.node_exe = node_exe
+        self.key = key
 
         if self.source is None:
             self.source = self._get_dot_file_name()

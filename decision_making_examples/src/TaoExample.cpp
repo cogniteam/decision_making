@@ -72,8 +72,8 @@ TAO(Tao1)
             TAO_CLEANUP_END
             TAO_STOP_CONDITION(event == TAO_EVENT(/FAIL))
             TAO_NEXT(NextFirstReady){
-                TAO_NEXT_PLAN(Plan2);
                 TAO_NEXT_PLAN(Plan3);
+                TAO_NEXT_PLAN(Plan2);
             }
         }
         TAO_PLAN( Plan2 ){
@@ -88,7 +88,7 @@ TAO(Tao1)
         }
         TAO_PLAN( Plan3 ){
             TAO_START_CONDITION(true);
-            TAO_RESULT(SUCCESS, TaskResult::SUCCESS());
+            //TAO_RESULT(SUCCESS, TaskResult::SUCCESS());
             TAO_ALLOCATE_EMPTY
             TAO_STOP_CONDITION(true);
             TAO_NEXT(NextFirstReady){
@@ -205,6 +205,7 @@ int main(int argc, char **argv) {
     eventQueue.async_spin();
     ROS_INFO("Starting tao example...");
     TaoTao1(NULL, &eventQueue);
+    eventQueue.close();
 
     ROS_INFO("Tao stopped");
 	return 0;

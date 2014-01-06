@@ -122,6 +122,8 @@ public:
 			} void r(){}\
 		}_e(state_name, call_ctx, *events_queue);_e.r();
 
+#define FSM_CONTEXT state_call_ctx
+
 #define FSM_STATE(X)  \
 			}}}break; \
 			case X: { \
