@@ -41,8 +41,6 @@ class DecisionMakingGraph(Plugin):
     def __init__(self, context):
         super(DecisionMakingGraph, self).__init__(context)
 
-        self._filter = 'decision_making'
-        
         self.initialized = False
         self.setObjectName('DecisionMakingGraph')
 
@@ -51,8 +49,10 @@ class DecisionMakingGraph(Plugin):
 
         context.add_widget(self._widget)
 
+        self._filter = 'decision_making'
+
         self._subscriber = None
-        self._subscribe('/diagnostics')
+        self._subscribe('/decision_making/monitoring')
 
     def _on_message(self, message):
         if not message.status[0].name[-len(self._filter):] == self._filter:

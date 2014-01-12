@@ -104,8 +104,9 @@ class DotProcessor(object):
         parent_x, parent_y = self._extract_positon(target_node)
         parent_width, parent_height = self._extract_node_size(target_node)
 
-        horizontal_offset = parent_x - parent_width * POINTS_PER_INCH / 2
-        vertical_offset = parent_y - parent_height * POINTS_PER_INCH / 2
+        # magic number detected
+        horizontal_offset = parent_x - parent_width * POINTS_PER_INCH / 2 + 8
+        vertical_offset = parent_y - parent_height * POINTS_PER_INCH / 2 + 8
 
         return horizontal_offset, vertical_offset
 
@@ -171,7 +172,11 @@ class DotProcessor(object):
             bounding_box = self._map_dot_graph(digraph_dot, graphs, graphs_nodes_and_edges, cluster_nodes)
             width, height = self._calculate_size(bounding_box)
 
-            node = self._create_fixed_size_node(digraph.get_name(), digraph.get_label(), str(width), str(height))
+            width += 0.2
+            height += 0.2
+
+            node = self._create_fixed_size_node(digraph.get_name(), digraph.get_label(), str(width), str(height),
+                                                digraph.get_URL())
 
             cluster_nodes.append(node)
             graph.add_node(node)
@@ -221,11 +226,8 @@ class DotProcessor(object):
     def _calculate_size(self, bounding_box):
         return [float(value) / POINTS_PER_INCH for value in bounding_box.strip('\"').split(',')[-2:]]
 
-    def _create_fixed_size_node(self, name, label, width, height, url=None):
-        if url:
-            return Node(name=name, label=label, shape='box', width=width, height=height, fixedsize='true', URL=url)
-
-        return Node(name=name, label=label, shape='box', width=width, height=height, fixedsize='true')
+    def _create_fixed_size_node(self, name, label, width, height, url):
+        return Node(name=name, label=label, shape='box', width=width, height=height, fixedsize='true', URL=url)
 
     def _is_html_node(self, node):
         if node.get_name() in ('graph', 'node', 'empty'):
@@ -283,8 +285,6 @@ class DotProcessor(object):
         digraph = Dot(graph_name=graph.get_name(), graph_type='digraph')
 
         for node in graph.get_node_list():
-            n = self._adjust_html_node_size(node)
-
             digraph.add_node(self._adjust_html_node_size(node))
 
         for edge in graph.get_edge_list():
@@ -306,11 +306,13 @@ class DotProcessor(object):
         digraph = Dot(graph_name=graph.get_name(), graph_type='digraph')
 
         label = None
+        url = None
         for node in graph.get_node_list():
             if node.get_name() in ('node', 'empty'):
                 continue
             elif node.get_name() == 'graph':
                 label = node.get_attributes().get('label', ' ')
+                url = node.get_attributes().get('URL', None)
             else:
                 digraph.add_node(node)
 
@@ -340,6 +342,9 @@ class DotProcessor(object):
         if label is not None:
             digraph.set_label(label)
             digraph.set_labelloc('t')
+
+        if url is not None:
+            digraph.set_URL(url)
 
         digraph_dot = digraph.create_dot()
 

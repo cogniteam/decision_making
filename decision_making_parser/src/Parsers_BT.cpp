@@ -37,11 +37,22 @@ public:
 		tkn_sel_bgn,
 		tkn_task_bgn,
 
+		tkn_dec_not_bgn,
+		tkn_dec_success_bgn,
+		tkn_dec_fail_bgn,
+
 		tkn_bt_end,
 		tkn_par_end,
 		tkn_seq_end,
 		tkn_sel_end,
 		tkn_task_end,
+
+		tkn_dec_not_end,
+        tkn_dec_success_end,
+        tkn_dec_fail_end,
+
+        tkn_set_task_result,
+        tkn_set_task_result_after,
 
 		tkn_call_bt,
 		tkn_call_task,
@@ -60,11 +71,22 @@ public:
 			tkn.string_token["BT_ROOT_BGN"]=tkn_bt_root_bgn;
 			tkn.string_token["BT_TASK_BGN"]=tkn_task_bgn;
 
+			tkn.string_token["BT_DEC_NOT_BGN"]=tkn_dec_not_bgn;
+			tkn.string_token["BT_DEC_SUCCESS_BGN"]=tkn_dec_success_bgn;
+			tkn.string_token["BT_DEC_FAIL_BGN"]=tkn_dec_fail_bgn;
+
 			tkn.string_token["BT_END"]=tkn_bt_end;
 			tkn.string_token["BT_PAR_END"]=tkn_par_end;
 			tkn.string_token["BT_SEQ_END"]=tkn_seq_end;
 			tkn.string_token["BT_SEL_END"]=tkn_sel_end;
 			tkn.string_token["BT_TASK_END"]=tkn_task_end;
+
+			tkn.string_token["BT_DEC_NOT_END"]=tkn_dec_not_end;
+            tkn.string_token["BT_DEC_SUCCESS_END"]=tkn_dec_success_end;
+            tkn.string_token["BT_DEC_FAIL_END"]=tkn_dec_fail_end;
+
+            tkn.string_token["BT_SET_TASK_RESULT"]=tkn_set_task_result;
+            tkn.string_token["BT_SET_TASK_RESULT_AFTER"]=tkn_set_task_result_after;
 
 			tkn.string_token["BT_CALL_FSM"]=tkn_call_fsm;
 			tkn.string_token["BT_CALL_BT"]=tkn_call_bt;
@@ -108,6 +130,61 @@ public:
 		TKN_NEXT( tkn_bclose )
 		return true;
 	}
+
+	size_t findClosingBracket(tstream& stream, TokenType openToken, TokenType closeToken) {
+        size_t foundIndex = tkn_search_close_parent(stream, openToken, closeToken);
+
+//        if (foundIndex == size_t(-1))
+//            throw ClosingBracketNotFound();
+
+        return foundIndex;
+    }
+
+	bool parse_bracket_content(tstream& stream, string& outputText) {
+        Token tkn;
+        TokenType openingBracket;
+        TokenType closingBracket;
+        stream >> tkn;
+
+        if (tkn.type == tkn_bopen) {
+            openingBracket = tkn.type;
+            closingBracket = tkn_bclose;
+        } else if (tkn.type == tkn_fopen) {
+            openingBracket = tkn.type;
+            closingBracket = tkn_fclose;
+        } else
+            return false;
+
+
+        size_t foundIndex = findClosingBracket(stream, openingBracket, closingBracket);
+
+        if (foundIndex == size_t(-1))
+            return false;
+
+        string resultString;
+        long startPosition = -1;
+        long endPosition = -1;
+
+        while (foundIndex > stream.i + 1) {
+            stream >> tkn;
+            resultString += tkn.text;
+
+            if (startPosition < 0)
+                startPosition = tkn.start;
+        }
+
+        endPosition = tkn.end;
+
+        // Closing bracket
+        stream >> tkn;
+
+        if (startPosition >= 0 and endPosition > startPosition)
+            resultString = fullText.substr(startPosition, endPosition - startPosition);
+
+        outputText = resultString;
+        return true;
+    }
+
 	bool name(tstream& stream, string txt, string& output){
 		int line, pos;
 		return name(stream, txt, output, line, pos);
@@ -134,6 +211,14 @@ public:
 		case tkn_task_bgn: return tkn_task_end;
 		case tkn_bt_bgn: return tkn_bt_end;
 		case tkn_bt_root_bgn: return tkn_bt_end;
+
+		/**
+		 * Decorators
+		 */
+		case tkn_dec_not_bgn: return tkn_dec_not_end;
+		case tkn_dec_success_bgn: return tkn_dec_success_end;
+		case tkn_dec_fail_bgn: return tkn_dec_fail_end;
+
 		default: return tkn_null;
 		}
 	}
@@ -155,6 +240,11 @@ public:
 		case tkn_sel_bgn: return "sel";
 		case tkn_seq_bgn: return "seq";
 		case tkn_task_bgn: return "task";
+
+		case tkn_dec_not_bgn: return "dec";
+		case tkn_dec_success_bgn: return "dec";
+		case tkn_dec_fail_bgn: return "dec";
+
 		default: return "?";
 		}
 	}
@@ -163,15 +253,26 @@ public:
 		Token tkn;
 		while(not stream.eof()){
 			stream >> tkn;
+
+			/**
+			 *
+			 */
 			if(
 				tkn.type == tkn_par_bgn or
 				tkn.type == tkn_seq_bgn or
 				tkn.type == tkn_sel_bgn or
-				tkn.type == tkn_task_bgn
+				tkn.type == tkn_task_bgn or
+				tkn.type == tkn_dec_fail_bgn
 			){
 				constructor.tree().create_node();
 				constructor.tree().node().type = node_type_str(tkn.type);
 				TKN_SEARCH( name(stream, "node "+tkn.type+" start", constructor.tree().node().name) )
+
+				if (tkn.type == tkn_dec_fail_bgn) {
+				    constructor.tree().node().name = "Fail";
+				    constructor.tree().node().decorator_name = "Fail [" + constructor.tree().node().name + "]";
+				}
+
 				if( bt_node_body(stream, tkn) ){
 					constructor.tree().add_node();
 				}else{
@@ -179,6 +280,24 @@ public:
 					return false;
 				}
 			}
+
+			if(
+                tkn.type == tkn_dec_not_bgn or
+                tkn.type == tkn_dec_success_bgn
+            ){
+
+			    constructor.tree().create_node();
+                constructor.tree().node().type = node_type_str(tkn.type);
+                constructor.tree().node().name = tkn.type == tkn_dec_not_bgn ? "Not" : "Success";
+
+                if( bt_node_body(stream, tkn) ){
+                    constructor.tree().add_node();
+                }else{
+                    constructor.tree().drop_node();
+                    return false;
+                }
+            }
+
 			if(
 				tkn.type == tkn_par_end or
 				tkn.type == tkn_seq_end or
@@ -186,9 +305,22 @@ public:
 				tkn.type == tkn_task_end
 			){
 				string node_name;
+
 				TKN_SEARCH( name(stream, "node "+tkn+" end", node_name) )
 				tknStack.pop_back();
 			}
+
+			/**
+			 * Decorators
+			 */
+            if(
+                tkn.type == tkn_dec_not_end or
+                tkn.type == tkn_dec_success_end or
+                tkn.type == tkn_dec_fail_end
+            ){
+                tknStack.pop_back();
+            }
+
 			if( tkn.type == tkn_call_fsm ){
 				string node_name; int line, pos;
 				TKN_SEARCH( name(stream, "node "+tkn+"", node_name, line, pos) )
@@ -222,7 +354,34 @@ public:
 				constructor.tree().node().call().pos = pos;
 				constructor.tree().node().add_call();
 			}
-		}
+
+			if( tkn.type == tkn_set_task_result ){
+                string node_name; int line, pos;
+                TKN_SEARCH( parse_bracket_content(stream, node_name) )
+                constructor.tree().node().create_call();
+                constructor.tree().node().call().type = "task_result";
+                constructor.tree().node().call().name = "TaskResult";
+                constructor.tree().node().call().task_result = node_name;
+                constructor.tree().node().call().file = filename;
+                constructor.tree().node().call().line = line;
+                constructor.tree().node().call().pos = pos;
+                constructor.tree().node().add_call();
+            }
+			if( tkn.type == tkn_set_task_result_after ){
+                string node_name; int line, pos;
+                TKN_SEARCH( parse_bracket_content(stream, node_name) )
+                constructor.tree().node().create_call();
+                constructor.tree().node().call().type = "task_result_after";
+                constructor.tree().node().call().name = "TaskResultAfter";
+                constructor.tree().node().call().task_result = node_name;
+                constructor.tree().node().call().file = filename;
+                constructor.tree().node().call().line = line;
+                constructor.tree().node().call().pos = pos;
+                constructor.tree().node().add_call();
+            }
+
+        }
+
 		return true;
 	}
 

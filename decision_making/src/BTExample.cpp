@@ -1,6 +1,4 @@
-
 #include <iostream>
-
 
 #include <boost/thread.hpp>
 #include <deque>
@@ -9,14 +7,12 @@
 #include <boost/thread/condition.hpp>
 #include <boost/shared_ptr.hpp>
 
-
 using namespace std;
 
 #include "SynchCout.h"
 #include "EventSystem.h"
 
 using namespace decision_making;
-
 
 EventQueue mainEventQueue;
 
@@ -52,15 +48,19 @@ EventQueue mainEventQueue;
 //	return e;
 //}
 
-void EVENTS_GENERATOR(){
+void EVENTS_GENERATOR() {
 //	Event spec[]={"SUCCESS", "FAIL", "SUCCESS", "FAIL", "SUCCESS", "FAIL", "SUCCESS", "FAIL", "GO", "NOTHING"};
-	Event spec[]={"SUCCESS", "NOTHING"};
-	int i=0;
+	Event spec[] = { "SUCCESS", "NOTHING" };
+	int i = 0;
 	boost::this_thread::sleep(boost::posix_time::seconds(1));
-	while(true){
+	while (true) {
 		Event t = spec[i];
-		if(t == "NOTHING"){ i=1; t=spec[0]; }else i++;
-		cout << endl << t<<" -> ";
+		if (t == "NOTHING") {
+			i = 1;
+			t = spec[0];
+		} else
+			i++;
+		cout << endl << t << " -> ";
 		mainEventQueue.riseEvent(t);
 		boost::this_thread::sleep(boost::posix_time::seconds(1));
 	}
@@ -93,13 +93,13 @@ void EVENTS_GENERATOR(){
 //==================== CONNECTION TO REAL TASKS ==============================
 
 //FROM BT
-TaskResult test_callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
-	cout<<" TASK("<<task_address<<":CALL) ";
+TaskResult test_callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue) {
+	cout << " TASK(" << task_address << ":CALL) ";
 	Event e = mainEventQueue.waitEvent();
-	if(e=="SUCCESS") return TaskResult::SUCCESS();
+	if (e == "SUCCESS")
+		return TaskResult::SUCCESS();
 	return TaskResult::FAIL();
 }
-
 
 //FROM FSM
 //void callTask(std::string task_address, const CallContext& call_ctx, EventQueue* queue){
@@ -123,7 +123,7 @@ TaskResult test_callTask(std::string task_address, const CallContext& call_ctx, 
 #define CALL_REMOTE(NAME, CALLS, EVENTS) boost::bind(&test_callTask, #NAME, CALLS, EVENTS)
 
 //=============================================================================
-
+#include <DecisionMaking.h>
 
 //BT_BGN(ST1_){
 //	PAR_BGN(P1){
@@ -149,29 +149,175 @@ TaskResult test_callTask(std::string task_address, const CallContext& call_ctx, 
 //	return main.run();
 //}
 
+//X(
 TaskResult BT_run_(){
 	BT_ROOT_BGN(root, mainEventQueue){
 		BT_PAR_BGN(P1){
-			BT_TASK_BGN(MY1){
-				cout<<"HELLO"<<endl;
-				//createRosTaskCaller(selfPtrForRosTaskCaller);
-				BT_TASK_RESULT( TaskResult::SUCCESS() );
-			}
-			BT_TASK_END(MY1);
-			BT_SEQ_BGN(S1){
-				BT_CALL_TASK(T1);
-				BT_CALL_TASK(T2);
-			}
-			BT_SEQ_END(S1);
-			BT_CALL_TASK(T3);
-			BT_CALL_TASK(T4);
+
+			BT_DEC_WHILE_BGN(isSuccess()){
+
+				BT_TASK_BGN(MY1){
+					cout<<"HELLO"<<endl;
+					//createRosTaskCaller(selfPtrForRosTaskCaller);
+					BT_TASK_RESULT( TaskResult::SUCCESS() );
+				}
+				BT_TASK_END(MY1)
+
+				//boost::this_thread::sleep(boost::posix_time::seconds(5));
+				BT_SLEEP(5)
+			}BT_DEC_WHILE_END
+
+
+			BT_SET_TASK_RESULT_AFTER(TaskResult::FAIL(10,"EXIT"), 1)
+
+//			BT_SEQ_BGN(S1){
+//				BT_CALL_TASK(T1);
+//				BT_CALL_TASK(T2);
+//			}
+//			BT_SEQ_END(S1);
+//			BT_CALL_TASK(T3);
+//			BT_CALL_TASK(T4);
 		}
 		BT_PAR_END(P1);
 	}
 	BT_END(root) main;
-	return main.run();
+	TaskResult res = main.run();
+	cout<<"RES: "<<res<<endl;
+	return res;
 }
+//)
 
+//TaskResult BT_run_() {
+//	cout<<"START"<<endl;
+//	struct __BT_NODE_root_STRUCT: public BTNode {
+//		BTContext _tmp_context;
+//		BTContext& context;
+//		__BT_NODE_root_STRUCT() :
+//				BTNode(BT_SEQ, "root", decision_making::CallContext(), mainEventQueue), _tmp_context(), context(_tmp_context) {
+//		}
+//		__BT_NODE_root_STRUCT(BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events) :
+//				BTNode(BT_SEQ, "root", calls, events), context(ctx) {
+//		}
+//		TaskResult run() {
+//			cout<<"START: __BT_NODE_root_STRUCT"<<endl;
+//			;
+//			BTNode* const & selfPtrForRosTaskCaller = this;
+//			std::vector<boost::shared_ptr<BTNode> > __ALL_NODES;
+//			{
+//				{
+//					struct __BT_NODE_P1_STRUCT;
+//					typedef __BT_NODE_P1_STRUCT    __LAST_BT_NODE_TYPE;
+//					typedef	boost::shared_ptr<BTNode> __LAST_BT_NODE_PTR;
+//					struct __BT_NODE_P1_STRUCT: public BTNode {
+//						typedef __BT_NODE_P1_STRUCT MY_NODE_TYPE;
+//						BTContext& context;
+//						std::string MY_NODE_NAME;
+//						__BT_NODE_P1_STRUCT(BTNode* p, BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events) :
+//								BTNode(BT_PAR, "P1", calls, events), context(ctx), MY_NODE_NAME("P1") {
+//							p->tasks.push_back(this);
+//						}
+//						TaskResult run() {
+//							cout<<"START: __BT_NODE_P1_STRUCT"<<endl;
+//
+//							;
+//							BTNode* const & selfPtrForRosTaskCaller = this;
+//							std::vector<boost::shared_ptr<BTNode> > __ALL_NODES;
+//							{
+//
+//								{
+//									struct __BT_NODE___BT_DEC_NOT___COUNTER___STRUCT;
+//									typedef __BT_NODE___BT_DEC_NOT___COUNTER___STRUCT    __LAST_BT_NODE_TYPE;
+//									typedef	boost::shared_ptr<BTNode> __LAST_BT_NODE_PTR;
+//									struct __BT_NODE___BT_DEC_NOT___COUNTER___STRUCT: public BTNode {
+//										typedef __BT_NODE___BT_DEC_NOT___COUNTER___STRUCT MY_NODE_TYPE;
+//										BTContext& context;
+//										std::string MY_NODE_NAME;
+//										__BT_NODE___BT_DEC_NOT___COUNTER___STRUCT(BTNode* p, BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events) :
+//												BTNode(BT_TASK, "__BT_DEC_NOT___COUNTER__", calls, events), context(ctx), MY_NODE_NAME("__BT_DEC_NOT___COUNTER__") {
+//											p->tasks.push_back(this);
+//										}
+//										TaskResult run() {
+//											cout<<"START: __BT_NODE___BT_DEC_NOT___COUNTER___STRUCT"<<endl;
+//
+//											;
+//											BTNode* const & selfPtrForRosTaskCaller = this;
+//											std::vector<boost::shared_ptr<BTNode> > __ALL_NODES;
+//											decision_making::TaskResult bt_node_return_value = decision_making::TaskResult::UNDEF();
+//											{
+//												{
+//
+//													{
+//														struct __BT_NODE_MY1_STRUCT;
+//														typedef __BT_NODE_MY1_STRUCT    __LAST_BT_NODE_TYPE; typedef
+//														boost::shared_ptr<BTNode> __LAST_BT_NODE_PTR;
+//														struct __BT_NODE_MY1_STRUCT: public BTNode {
+//															typedef __BT_NODE_MY1_STRUCT MY_NODE_TYPE;
+//															BTContext& context;
+//															std::string MY_NODE_NAME;
+//															__BT_NODE_MY1_STRUCT(BTNode* p, BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events) :
+//																	BTNode(BT_TASK, "MY1", calls, events), context(ctx), MY_NODE_NAME("MY1") {
+//																p->tasks.push_back(this);
+//															}
+//															TaskResult run() {
+//																cout<<"START: __BT_NODE_MY1_STRUCT"<<endl;
+//
+//																;
+//																BTNode* const & selfPtrForRosTaskCaller = this;
+//																std::vector<boost::shared_ptr<BTNode> > __ALL_NODES;
+//																decision_making::TaskResult bt_node_return_value = decision_making::TaskResult::UNDEF();
+//																{
+//																	Log() << "HELLO" << endl;
+//																	//createRosTaskCaller(selfPtrForRosTaskCaller);
+//																	bt_node_return_value = TaskResult::SUCCESS();
+//																}
+//																this->run_all();
+//																;
+//																cout<<"RESULT: "<<bt_node_return_value<<" : "<< call_ctx.str()<<endl;
+//																return bt_node_return_value;
+//															}
+//														};
+//														boost::shared_ptr<BTNode> __BT_NODE_MY1_INSTANCE((BTNode*) new __BT_NODE_MY1_STRUCT(this, context, call_ctx, events));
+//														__ALL_NODES.push_back(__BT_NODE_MY1_INSTANCE);
+//													}
+//
+//												}
+//											}
+//											this->run_all();
+//											;
+//											cout<<"RESULT: "<<bt_node_return_value<<" : "<< call_ctx.str()<<endl;
+//											return bt_node_return_value;
+//										}
+//									};
+//									__LAST_BT_NODE_PTR    __BT_NODE_11_INSTANCE((BTNode*)new __LAST_BT_NODE_TYPE(this, context, call_ctx, events));
+//									__ALL_NODES.push_back(__BT_NODE_11_INSTANCE);
+//								};
+//
+////			BT_SEQ_BGN(S1){
+////				BT_CALL_TASK(T1);
+////				BT_CALL_TASK(T2);
+////			}
+////			BT_SEQ_END(S1);
+////			BT_CALL_TASK(T3);
+////			BT_CALL_TASK(T4);
+//							}
+//							this->run_all();
+//							;
+//							return bt_node_return_value;
+//						}
+//					};
+//					boost::shared_ptr<BTNode> __BT_NODE_P1_INSTANCE((BTNode*) new __BT_NODE_P1_STRUCT(this, context, call_ctx, events));
+//					__ALL_NODES.push_back(__BT_NODE_P1_INSTANCE);
+//				};
+//			}
+//			this->run_all();
+//			;
+//			return bt_node_return_value;
+//		}
+//	} main;
+//	TaskResult res = main.run();
+//	Log() << "RES: " << res << endl;
+//	return res;
+//}
 
 ////TREE(ST1,
 ////	PAR(P1,
@@ -253,17 +399,16 @@ TaskResult BT_run_(){
 ////}
 //
 
+
 int main() {
 
-boost::thread_group threads;
-threads.add_thread(new boost::thread(boost::bind(&BT_run_)));
+	boost::thread_group threads;
+	threads.add_thread(new boost::thread(boost::bind(&BT_run_)));
 //threads.add_thread(new boost::thread(boost::bind(&BT_run_version_with_subtree_)));
-threads.add_thread(new boost::thread(boost::bind(&EVENTS_GENERATOR)));
+	threads.add_thread(new boost::thread(boost::bind(&EVENTS_GENERATOR)));
 
-threads.join_all();
+	threads.join_all();
 
-return 0;
+	return 0;
 }
-
-
 

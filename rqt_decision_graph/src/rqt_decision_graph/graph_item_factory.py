@@ -82,9 +82,8 @@ class GraphItemFactory(object):
         return NodeItem(bounding_box, shape, label, label_pos, url, parent, **kwargs)
 
     def _check_constraints(self, dictionary, node=True):
-
-        if 'pen_width' not in dictionary:
-            dictionary['pen_width'] = self._pen_width
+        if 'penwidth' not in dictionary:
+            dictionary['penwidth'] = self._pen_width
 
         if not node:
             if 'edge_pen_width' not in dictionary:

@@ -67,6 +67,8 @@ public:
 	mutable string id;
 	string type;
 	string name;
+	string decorator_name;
+	string task_result;
 	int line, pos;
 	string file;
 	Node():line(0),pos(0){}

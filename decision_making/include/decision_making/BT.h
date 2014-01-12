@@ -14,6 +14,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/preprocessor/slot/counter.hpp>
 
 #include "EventSystem.h"
 #include "TaskResult.h"
@@ -170,15 +171,25 @@ typedef BTNode CurrentNodeType;
 
 #define BT_CALL_BT(NAME) \
 		BT_NODE_PTR(NAME) BT_NODE(NAME)((BTNode*)new BT_NODE_TYPE(NAME)(this, context, call_ctx, events));\
-		__ALL_NODES.push_back(BT_NODE(NAME))
+		__ALL_NODES.push_back(BT_NODE(NAME));\
+		CUR_NODE = BT_NODE(NAME);
+
+#define __BT_CALL_BT_NONAME(NAME) \
+		__LAST_BT_NODE_PTR BT_NODE(NAME)((BTNode*)new __LAST_BT_NODE_TYPE(this, context, call_ctx, events));\
+		__ALL_NODES.push_back(BT_NODE(NAME));\
+		CUR_NODE = BT_NODE(NAME);
 
 #define __BT_CALL_BT_CALLER(NAME) \
 		call_ctx.pop(); \
 		BT_NODE_PTR(NAME) BT_NODE(NAME)((BTNode*)new BT_NODE_TYPE(NAME)(this, context, call_ctx, events));\
 		__ALL_NODES.push_back(BT_NODE(NAME))
 
+
+//===================== HEADER =============================================
 #define BT_HEADER(NAME) struct BT_NODE_TYPE(NAME);
 
+
+//=====================  ROOT AND NODES ====================================
 #define BT_ROOT_BGN(NAME,EVENTS)\
 	struct BT_NODE_TYPE(NAME):public BTNode\
 	{ \
@@ -194,8 +205,10 @@ typedef BTNode CurrentNodeType;
 #define __BT_NODE_BGN(TYPE, NAME, STR)\
 	struct BT_NODE_TYPE(NAME):public BTNode\
 	{ \
+		typedef BT_NODE_TYPE(NAME) MY_NODE_TYPE;\
 		BTContext& context;\
-		BT_NODE_TYPE(NAME)(BTNode* p, BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events):BTNode(TYPE, #NAME, calls, events),context(ctx){\
+		std::string MY_NODE_NAME;\
+		BT_NODE_TYPE(NAME)(BTNode* p, BTContext& ctx, const decision_making::CallContext& calls, decision_making::EventQueue& events):BTNode(TYPE, #NAME, calls, events),context(ctx),MY_NODE_NAME(#NAME){\
 			p->tasks.push_back(this);\
 		}\
 		TaskResult run()\
@@ -212,21 +225,53 @@ typedef BTNode CurrentNodeType;
 			return bt_node_return_value;\
 		}\
 	}
+#define __BT_END_NODE_NONAME\
+			this->run_all();\
+			DMDEBUG( cout<<" }[BT:" <<MY_NODE_NAME<< "] "; )\
+			ON_BT_NODE_END(MY_NODE_NAME, call_ctx, events, bt_node_return_value);\
+			return bt_node_return_value;\
+		}\
+	}
+
+#define __BT_PREDEF(NAME) \
+		BT_NODE_PTR(NAME) BT_NODE(NAME); \
+		{\
+			BT_NODE_PTR(NAME)& CUR_NODE=BT_NODE(NAME);\
+			struct BT_NODE_TYPE(NAME);\
+			typedef BT_NODE_TYPE(NAME) __LAST_BT_NODE_TYPE;\
+			typedef BT_NODE_PTR(NAME) __LAST_BT_NODE_PTR;
+
+#define __BT_POSTDEF \
+		;}
 
 #define BT_BGN(NAME) __BT_NODE_BGN(BT_SEQ, NAME, "=>")
-#define BT_PAR_BGN(NAME)  __BT_NODE_BGN(BT_PAR, NAME, "||")
-#define BT_SEQ_BGN(NAME)  __BT_NODE_BGN(BT_SEQ, NAME, "->")
-#define BT_SEL_BGN(NAME)  __BT_NODE_BGN(BT_SEL, NAME, "??")
-#define BT_TASK_BGN(NAME) __BT_NODE_BGN(BT_TASK, NAME, "") decision_making::TaskResult bt_node_return_value = decision_making::TaskResult::UNDEF();
+//#define BT_PAR_BGN(NAME)  __BT_NODE_BGN(BT_PAR, NAME, "||")
+//#define BT_SEQ_BGN(NAME)  __BT_NODE_BGN(BT_SEQ, NAME, "->")
+//#define BT_SEL_BGN(NAME)  __BT_NODE_BGN(BT_SEL, NAME, "??")
+//#define BT_TASK_BGN(NAME) __BT_NODE_BGN(BT_TASK, NAME, "") decision_making::TaskResult bt_node_return_value = decision_making::TaskResult::UNDEF();
+
+#define BT_PAR_BGN(NAME)  __BT_PREDEF(NAME) __BT_NODE_BGN(BT_PAR, NAME, "||")
+#define BT_SEL_BGN(NAME)  __BT_PREDEF(NAME) __BT_NODE_BGN(BT_SEL, NAME, "??")
+#define BT_SEQ_BGN(NAME)  __BT_PREDEF(NAME) __BT_NODE_BGN(BT_SEQ, NAME, "->")
+#define BT_TASK_BGN(NAME) __BT_PREDEF(NAME) __BT_NODE_BGN(BT_TASK, NAME, "") decision_making::TaskResult bt_node_return_value = decision_making::TaskResult::UNDEF();
 
 #define BT_END(NAME) __BT_END_NODE(NAME)
 
 #define __BT_END_TASK(NAME) __BT_END_NODE(NAME); BT_CALL_BT(NAME)
+#define __BT_END_TASK_NONAME __BT_END_NODE_NONAME; __BT_CALL_BT_NONAME(__COUNTER__)
 
-#define BT_PAR_END(NAME)  __BT_END_TASK(NAME)
-#define BT_SEQ_END(NAME)  __BT_END_TASK(NAME)
-#define BT_SEL_END(NAME)  __BT_END_TASK(NAME)
-#define BT_TASK_END(NAME) __BT_END_TASK(NAME)
+//#define BT_PAR_END(NAME)  __BT_END_TASK(NAME)
+//#define BT_SEQ_END(NAME)  __BT_END_TASK(NAME)
+//#define BT_SEL_END(NAME)  __BT_END_TASK(NAME)
+//#define BT_TASK_END(NAME) __BT_END_TASK(NAME)
+
+#define BT_PAR_END(NAME)  __BT_END_TASK(NAME) __BT_POSTDEF
+#define BT_SEL_END(NAME)  __BT_END_TASK(NAME) __BT_POSTDEF
+#define BT_SEQ_END(NAME)  __BT_END_TASK(NAME) __BT_POSTDEF
+#define BT_TASK_END(NAME) __BT_END_TASK(NAME) __BT_POSTDEF
+#define BT_TASK_END_NONAME __BT_END_TASK_NONAME __BT_POSTDEF
+
+//=============================  CALLS ===========================
 
 #define __BTDEFSUBEVENTQUEUE(NAME) decision_making::EventQueue events_##NAME(&events);
 //#define __BTDEFSUBCTEXT(NAME) CallContext call_ctx_##NAME(call_ctx, #NAME);
@@ -251,6 +296,82 @@ typedef BTNode CurrentNodeType;
 //Deprecated
 #define BT_RISE(EVENT) BT_RAISE(EVENT)
 
+#define ___BTMERGE_(a,b)  a##b
+#define ___BTLABEL_(p,a) ___BTMERGE_(p, a)
+#define ___BTUNIQUE_NAME(p) ___BTLABEL_(p,__COUNTER__)
+
+//======================== DECORATORS ============================
+
+//=========== NOT ============
+
+#define BT_DEC_NOT_BGN \
+		BT_TASK_BGN(___BTUNIQUE_NAME(_lbl_BT_DEC_NOT_)){
+
+#define BT_DEC_NOT_END \
+		decision_making::TaskResult res1 = BT_LAST_NODE->run();\
+		BT_TASK_RESULT( res1==decision_making::TaskResult::SUCCESS()?decision_making::TaskResult::FAIL("NOT"):decision_making::TaskResult::SUCCESS() );\
+	}BT_TASK_END_NONAME;
+
+
+//========== SUCCESS ==========
+
+#define BT_DEC_SUCCESS_BGN \
+		BT_TASK_BGN(___BTUNIQUE_NAME(_lbl_BT_DEC_SUCCESS_)){
+
+#define BT_DEC_SUCCESS_END \
+		decision_making::TaskResult res1 = BT_LAST_NODE->run();\
+		BT_TASK_RESULT( decision_making::TaskResult::SUCCESS() );\
+	}BT_TASK_END_NONAME;
+
+//========== FAIL ==========
+
+#define BT_DEC_FAIL_BGN(ERROR_CODE) \
+		BT_TASK_BGN(___BTUNIQUE_NAME(_lbl_BT_DEC_FAIL_)){ int _error_code = ERROR_CODE;
+
+#define BT_DEC_FAIL_END \
+		decision_making::TaskResult res1 = BT_LAST_NODE->run();\
+		BT_TASK_RESULT( decision_making::TaskResult::FAIL(_error_code) );\
+	}BT_TASK_END_NONAME;
+
+
+//========== WHILE ==========
+
+#define BT_DEC_WHILE_BGN(CONDITION) \
+		BT_TASK_BGN(___BTUNIQUE_NAME(_lbl_BT_DEC_WHILE_)){ \
+			struct CHECK_RESULT{\
+				decision_making::TaskResult task_result;\
+				bool check(){ return task_result.CONDITION ;}\
+			} _CHECK_RESULT;\
+			do{
+
+#define BT_DEC_WHILE_END \
+			if(not isTerminated())\
+			_CHECK_RESULT.task_result = BT_LAST_NODE->run(); }while( _CHECK_RESULT.check() and not isTerminated() );\
+		BT_TASK_RESULT( _CHECK_RESULT.task_result );\
+	}BT_TASK_END_NONAME;
+
+
+//========== SET RESULT ==========
+
+#define __MAX(x,y) ((x)>(y)?(x):(y))
+#define __MIN(x,y) ((x)<(y)?(x):(y))
+
+#define BT_SLEEP(time)\
+		for(int i=0;i<__MAX(1,(float(time)/0.5F)) and not isTerminated();i++){ boost::this_thread::sleep(boost::posix_time::milliseconds(1000*__MIN(0.5F,time-0.5F*i))); }
+
+#define BT_SET_TASK_RESULT(RESULT) \
+		BT_TASK_BGN(___BTUNIQUE_NAME(_lbl_BT_SET_TASK_RESULT_)){ \
+		    BT_TASK_RESULT( RESULT );\
+	    }BT_TASK_END_NONAME;
+
+#define BT_SET_TASK_RESULT_AFTER(RESULT, time) \
+		BT_TASK_BGN(___BTUNIQUE_NAME(_lbl_BT_SET_TASK_RESULT_)){ \
+			BT_SLEEP(time)\
+		    BT_TASK_RESULT( RESULT );\
+	    }BT_TASK_END_NONAME;
+
+
+//===================== SHORT SYNTAX =======================
 #if USE_SHORT_BT_SYNTAX
 
 #define TASK(NAME,...)\
@@ -288,6 +409,8 @@ typedef BTNode CurrentNodeType;
 				 );}while(0)
 #endif
 
+
+//======================== BT CALLER ==================================
 
 struct BTCaller{
 	std::string task_address;

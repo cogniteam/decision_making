@@ -63,6 +63,7 @@ class DmgNodeItem(HoveredNodeItem):
         self._graphics_item_pen.setColor(color)
         self._label_pen.setColor(color)
 
+        self._graphics_item_pen.setColor(color)
         self._graphics_item.setPen(self._graphics_item_pen)
 
         if self._label is not None:
@@ -84,6 +85,7 @@ class DmgNodeItem(HoveredNodeItem):
         else:
             self._graphics_item_pen.setWidthF(self._pen_width)
             self._label_pen.setWidthF(self._label_pen_width)
+
         self._label.setPen(self._label_pen)
         self._graphics_item.setPen(self._graphics_item_pen)
 

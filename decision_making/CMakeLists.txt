@@ -110,8 +110,8 @@ include_directories(
 
 ## Declare a cpp executable
 
-#add_executable(bt_example src/BTExample.cpp)
-#target_link_libraries(bt_example  ${catkin_LIBRARIES} )
+add_executable(bt_example src/BTExample.cpp)
+target_link_libraries(bt_example  ${catkin_LIBRARIES} )
 
 
 add_executable(tao_example src/TAOExample.cpp)

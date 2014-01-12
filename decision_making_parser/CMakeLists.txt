@@ -5,18 +5,18 @@ project(decision_making_parser)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp  
-) 
- 
+  roscpp   
+)       
+      
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+      
  
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
-  
+   
 ################################################ 
 ## Declare ROS messages, services and actions ##
 ################################################  
@@ -40,14 +40,14 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .msg/.srv/.action file to be processed
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
+ 
 ## Generate messages in the 'msg' folder
-# add_message_files(
+# add_message_files( 
 #   FILES
 #   Message1.msg
 #   Message2.msg
 # )
-
+         
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
@@ -89,7 +89,7 @@ catkin_package(
 ## Build ##
 ########### 
 
-
+ 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
@@ -117,7 +117,7 @@ add_executable(decision_making_parser
 	src/BTConstructor_for_Dot.cpp
 	src/FSMConstructor_for_Dot.cpp
 )
-
+ 
 add_executable(tao_parser_test
     src/TAOParserTest.cpp
     src/TAOConstructor.cpp
@@ -130,17 +130,17 @@ add_executable(tao_parser_test
 	src/BTConstructor_for_Dot.cpp
 	src/FSMConstructor_for_Dot.cpp
 )
- 
-  
+   
+              
 set(SRC_XML_PARSER "${CMAKE_CURRENT_SOURCE_DIR}/src/xml_parser.py")
 message("  -- Source of Xml Parser location is ${SRC_XML_PARSER}")
 
 set( XMLPARSER "${CATKIN_DEVEL_PREFIX}/lib/${PROJECT_NAME}/decision_making_xml_parser.py" ) 
 message("  -- Xml Parser location is ${XMLPARSER}")
-
+  
 FILE(READ "${SRC_XML_PARSER}" SRC_XML_PARSER_TEXT )
 FILE(WRITE "${XMLPARSER}" "${SRC_XML_PARSER_TEXT}" )
-
+ 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(decision_making_parser_node decision_making_parser_generate_messages_cpp)
@@ -153,7 +153,7 @@ FILE(WRITE "${XMLPARSER}" "${SRC_XML_PARSER_TEXT}" )
 #############
 ## Install ##
 #############
-
+   
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 

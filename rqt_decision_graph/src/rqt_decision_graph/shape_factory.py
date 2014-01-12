@@ -39,6 +39,16 @@ class StaticClassError(Exception):
     pass
 
 
+class QGraphicsRoundRectItem(QGraphicsRectItem):
+    def __init__(self, bounding_box):
+        super(QGraphicsRoundRectItem, self).__init__(bounding_box)
+
+    def paint(self, painter, option, widget):
+        if self.pen() is not None:
+            painter.setPen(self.pen())
+        painter.drawRoundedRect(self.boundingRect(), 4.0, 4.0)
+
+
 class ShapeFactory:
     message = None
 
@@ -51,7 +61,7 @@ class ShapeFactory:
         graphics_item = None
 
         if shape in ('box', 'rect', 'rectangle'):
-            graphics_item = QGraphicsRectItem(bounding_box)
+            graphics_item = QGraphicsRoundRectItem(bounding_box)
         elif shape in ('ellipse', 'point'):
             graphics_item = QGraphicsEllipseItem(bounding_box)
         elif shape == 'diamond':
@@ -70,22 +80,29 @@ class ShapeFactory:
         elif shape == 'parallelogram':
             points = QPolygonF([QPointF(bounding_box.x() + bounding_box.width() * 1/6,
                                         bounding_box.y()),
+
                                 QPointF(bounding_box.x() + bounding_box.width(),
                                         bounding_box.y()),
+
                                 QPointF(bounding_box.x() + bounding_box.width() * 5/6,
                                         bounding_box.y() + bounding_box.height()),
+
                                 QPointF(bounding_box.x(),
                                         bounding_box.y() + bounding_box.height())])
             graphics_item = QGraphicsPolygonItem(points)
         elif shape == 'cds':
             points = QPolygonF([QPointF(bounding_box.x(),
                                         bounding_box.y()),
-                                QPointF(bounding_box.x() + bounding_box.width(),
+
+                                QPointF(bounding_box.x() + bounding_box.width() * 5/6,
                                         bounding_box.y()),
-                                QPointF(bounding_box.x() + bounding_box.width() + bounding_box.height() / 2,
-                                        bounding_box.y() + bounding_box.height() / 2),
+
                                 QPointF(bounding_box.x() + bounding_box.width(),
+                                        bounding_box.y() + bounding_box.height() / 2),
+
+                                QPointF(bounding_box.x() + bounding_box.width() * 5/6,
                                         bounding_box.y() + bounding_box.height()),
+
                                 QPointF(bounding_box.x(),
                                         bounding_box.y() + bounding_box.height())])
             graphics_item = QGraphicsPolygonItem(points)
@@ -135,6 +152,38 @@ class ShapeFactory:
             graphics_item = QGraphicsPolygonItem(points)
         elif shape == 'record':
             graphics_item = QGraphicsRectItem(bounding_box)
+        elif shape == 'hexagon':
+            points = QPolygonF([QPointF(bounding_box.x() + bounding_box.width() * 1/5,
+                                        bounding_box.y()),
+
+                                QPointF(bounding_box.x() + bounding_box.width() * 4/5,
+                                        bounding_box.y()),
+
+                                QPointF(bounding_box.x() + bounding_box.width(),
+                                        bounding_box.y() + bounding_box.height() / 2),
+
+                                QPointF(bounding_box.x() + bounding_box.width() * 4/5,
+                                        bounding_box.y() + bounding_box.height()),
+
+                                QPointF(bounding_box.x() + bounding_box.width() * 1/5,
+                                        bounding_box.y() + bounding_box.height()),
+
+                                QPointF(bounding_box.x(),
+                                        bounding_box.y() + bounding_box.height() / 2)])
+            graphics_item = QGraphicsPolygonItem(points)
+        elif shape == 'triangle':
+            points = QPolygonF([QPointF(bounding_box.x() + bounding_box.width() / 2,
+                                        bounding_box.y()),
+
+                                QPointF(bounding_box.x() + bounding_box.width(),
+                                        bounding_box.y() + bounding_box.height() * 3/4),
+
+                                QPointF(bounding_box.x(),
+                                        bounding_box.y() + bounding_box.height() * 3/4)])
+            graphics_item = QGraphicsPolygonItem(points)
+        elif shape == 'circle':
+            diameter = min(bounding_box.width(), bounding_box.height())
+            graphics_item = QGraphicsEllipseItem(bounding_box.x(), bounding_box.y(), diameter, diameter)
         else:
             graphics_item = QGraphicsRectItem(bounding_box)
             ShapeFactory.message = "WARNING: %s is unknown shape, box used instead" % shape

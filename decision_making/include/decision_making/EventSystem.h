@@ -140,7 +140,7 @@ inline std::ostream& operator<<(std::ostream& o, Event t){
 }
 
 class EventQueue{
-private:
+protected:
 	const bool isTransit;
 	mutable boost::mutex events_mutex;
 	boost::condition_variable on_new_event;
@@ -209,7 +209,7 @@ private:
 		if(notify) on_new_event.notify_one();
 	}
 public:
-	Event waitEvent(){
+	virtual Event waitEvent(){
 		boost::mutex::scoped_lock l(events_mutex);
 		while(events_system_stop==false && events.empty())	on_new_event.wait(l);
 		if(events_system_stop)

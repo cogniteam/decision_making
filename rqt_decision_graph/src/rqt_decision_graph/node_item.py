@@ -54,12 +54,16 @@ class NodeItem(GraphItem):
         self._label_pen.setJoinStyle(Qt.RoundJoin)
         self._label_pen.setWidthF(self._label_pen_width)
 
-        self._graphics_item_pen = QPen(self._label_pen)
-        self._graphics_item_pen.setWidthF(self._pen_width)
+        if self._pen_width == 0.0:
+            self._graphics_item_pen = QPen(Qt.NoPen)
+        else:
+            self._graphics_item_pen = QPen(self._label_pen)
+            self._graphics_item_pen.setWidthF(self._pen_width)
 
         self._graphics_item = ShapeFactory.create(shape, bounding_box)
         if ShapeFactory.message is not None:
             print ShapeFactory.message
+
         self.addToGroup(self._graphics_item)
 
         if not shape == 'point':

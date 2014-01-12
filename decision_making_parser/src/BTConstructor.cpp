@@ -22,6 +22,13 @@ void bt_NODE_bgn(std::ostream& out, std::string tab, std::string node, std::stri
 	out<<tab<<"<"<<node<<"" <<_name <<_id <<">";
 }
 
+void bt_NODE_bgn(std::ostream& out, std::string tab, std::string node, std::string name, string id, string attr, string attr_value){
+    string _name = " name=\""+ name +"\"";
+    string _id = " id=\""+ id +"\"";
+    string _attr = " " + attr + "=\""+ attr_value +"\"";
+    out<<tab<<"<"<<node<<"" <<_name <<_id << _attr <<">";
+}
+
 void bt_tree_bgn(std::ostream& out, std::string tab, std::string name, string id){
 	bt_NODE_bgn(out, tab, "plan", name , id);
 }
@@ -52,8 +59,8 @@ void bt_task_bgn(std::ostream& out, std::string tab, std::string name, string id
 void bt_task_end(std::ostream& out, std::string tab){
 	out<<tab<<"</task>";
 }
-void bt_dec_bgn(std::ostream& out, std::string tab, std::string name, string id){
-	bt_NODE_bgn(out, tab, "dec", name , id);
+void bt_dec_bgn(std::ostream& out, std::string tab, std::string name, string id, string dec_type){
+	bt_NODE_bgn(out, tab, "dec", name , id, "type", dec_type);
 }
 void bt_dec_end(std::ostream& out, std::string tab){
 	out<<tab<<"</dec>";
@@ -65,7 +72,12 @@ void bt_call(std::ostream& out, std::string tab, std::string name, std::string t
 		out<<tab<<"<task"<< _name << _id <<" />";
 	}
 }
-
+void bt_task_result(std::ostream& out, std::string tab, std::string name, string id, string task_result){
+    bt_NODE_bgn(out, tab, "task_result", name , id, "result", task_result);
+}
+void bt_task_result_after(std::ostream& out, std::string tab, std::string name, string id, string task_result){
+    bt_NODE_bgn(out, tab, "task_result_after", name , id, "result", task_result);
+}
 bool saveXml_call_node(std::ostream& out, const Node& o){
 	string resolved = "";
 	if(o.type == "bt"){
@@ -115,7 +127,15 @@ std::ostream& saveXml(std::ostream& out, const Node& o){
 	if(o.type == "par")	bt_par_bgn(out, o.tab, o.name, o.getId());
 	if(o.type == "seq")	bt_seq_bgn(out, o.tab, o.name, o.getId());
 	if(o.type == "sel")	bt_sel_bgn(out, o.tab, o.name, o.getId());
-	if(o.type == "dec")	bt_dec_bgn(out, o.tab, o.name, o.getId());
+
+	/**
+	 * TODO Unique id
+	 */
+	if(o.type == "dec")	bt_dec_bgn(out, o.tab, o.name, o.getId(), o.decorator_name);
+
+	if(o.type == "task_result") bt_task_result(out, o.tab, o.name, o.getId(), o.task_result);
+	if(o.type == "task_result_after") bt_task_result_after(out, o.tab, o.name, o.getId(), o.task_result);
+
 	if(o.type == "task")bt_task_bgn(out, o.tab, o.name, o.getId());
 	FOREACH_VEC(Node, nodes){
 		out<<endl;

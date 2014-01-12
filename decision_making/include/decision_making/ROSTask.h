@@ -150,6 +150,17 @@ public:
 	virtual bool check_external_ok(){return ros::ok();}
 
 	void publish_spin_event(){ do_not_publish_spin = false; }
+
+    virtual Event waitEvent(){
+        boost::mutex::scoped_lock l(events_mutex);
+        while(events_system_stop==false && events.empty() DM_SYSTEM_STOP)   on_new_event.timed_wait(l, boost::get_system_time()+ boost::posix_time::milliseconds(1000));
+        events_system_stop = not (not events_system_stop DM_SYSTEM_STOP);
+        if(events_system_stop)
+            return Event();
+        Event e = events.front();
+        events.pop_front();
+        return e;
+    }
 };
 
 }

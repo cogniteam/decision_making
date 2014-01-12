@@ -38,6 +38,7 @@ class NodeShape:
 			self.nfillcolor="#FFCC99"
 		else:
 			self.nshape="ellipse"
+# 			print "###### TAG NAME = ", tag_name
 	def set(self, node):
 		node.set_shape(self.nshape)
 		node.set_fillcolor(self.nfillcolor)
@@ -80,21 +81,34 @@ def gen_tao_nodes(node, graph):
 	for plan in plans:
 		(start_condition, stop_condition, allocate_protocol, next_protocol) = get_plan_details(plan)
 		import cgi
-		
+		 
 		label_content = """<
-		<table border='1' width='100px' style='widht: 100px !important;'>
+		
+		<table style="">
 			<tr>
-				<td colspan="2">
-					{planName}
+				<td style="background-color: #23a4ff; color: #fff; font-weight: bold; padding: 5px; font-size: 12pt;" align="center">
+					<b>{planName}</b>
 				</td>
 			</tr>
 			<tr>
-				<td>{startCondition}</td>
-				<td>{stopCondition}</td>
-			</tr>
-			<tr>
-				<td>{allocateProtocol}</td>
-				<td>{nextProtocol}</td>
+				<td style="padding: 0; maring: 0;">
+
+					<table style="border-width: 1px; border-style: solid; border-color: #999;">
+						<tr>
+							<td style="padding: 4px; maring: 0;">
+			                	{startCondition}
+			            	</td>
+							<td style="padding: 4px; maring: 0;">
+			                	{stopCondition}
+			            	</td>
+						</tr>
+						<tr>
+							<td style="padding: 4px; maring: 0;">{allocateProtocol}</td>
+							<td style="padding: 4px; maring: 0;">{nextProtocol}</td>
+						</tr>
+					</table>
+
+				</td>
 			</tr>
 		</table>
 		>""".format(
@@ -149,15 +163,23 @@ def graph_gen_nodes(xml, node, graph, elem, ids):
 	if node.tag in ['parallel']:
 		for chnode in node:
 			graph_gen_nodes(xml, chnode, graph, elem, ids)
-	if node.tag in ['state']:
-		if len(node.findall('state')+node.findall('plan')+node.findall('parallel'))==0:
-			gr_node=pydot.Node(ids[node.attrib["id"]],label=node.attrib["name"], URL=node.attrib["id"])
+	if node.tag in ['state', 'invoke']:
+		if len(node.findall('state')+node.findall('invoke')+node.findall('plan')+node.findall('parallel'))==0:
+			
+			if node.tag == 'invoke':
+				gr_node=pydot.Node(ids[node.attrib["id"]],label=node.attrib["name"], URL=node.attrib["id"], penwidth="0")
+			else:
+				gr_node=pydot.Node(ids[node.attrib["id"]],label=node.attrib["name"], URL=node.attrib["id"])
+			
 			elem.add_node(gr_node)
 		else:
 			has_init_state = 'initialstate' in node.attrib
 			lbl = node.attrib["name"]
 			if has_init_state : lbl = 'FSM['+lbl+']'
+			
+			
 			gr_cluster=pydot.Cluster(ids[node.attrib["id"]],label=lbl, URL=node.attrib["id"])
+			
 			elem.add_subgraph(gr_cluster)
 			if has_init_state:
 				gr_st_node = pydot.Node(ids[node.attrib["id"]]+"start", shape="point")
@@ -179,8 +201,10 @@ def graph_gen_nodes(xml, node, graph, elem, ids):
 			shape = NodeShape(node.tag)
 			shape.set(gr_node)
 			elem.add_node(gr_node)
-			for chnode in node.findall('plan'):
+			for chnode in node:
 				graph_gen_nodes(xml, chnode, graph, elem, ids)
+# 			for chnode in node.findall('task'):
+# 				graph_gen_nodes(xml, chnode, graph, elem, ids)
 		else:
 			gr_cluster=pydot.Cluster(ids[node.attrib["id"]],label=node.attrib["name"], URL=node.attrib["id"])
 			elem.add_subgraph(gr_cluster)
@@ -207,6 +231,7 @@ def graph_gen_nodes(xml, node, graph, elem, ids):
 
 def find_simple_node(state):
 	if state.tag == "state" and len([x for x in state if x.tag!='transition'])==0 : return state.attrib["id"]
+	if state.tag == "invoke" and len([x for x in state if x.tag!='transition'])==0 : return state.attrib["id"]
 	if state.tag in ['plan','pln', 'par', 'dec', 'seq', 'sel' ] : return state.attrib["id"]
 	if state.tag in ["task","tsk"] and len(state.findall('scxml'))==0 : return state.attrib["id"]
 	for n in state.iter(): 
@@ -229,18 +254,31 @@ def graph_gen_edges(xml, node, graph, elem, ids, fsm=None):
 		for chnode in node:
 			graph_gen_edges(xml, chnode, graph, elem, ids, fsm)
 	if node.tag in ['task', 'tsk']:
-		for chnode in node.findall('plan'):
-			src_state_id = node.attrib["id"]
-			dst_state_id = chnode.attrib['id']
-			src = src_state_id
-			dst = dst_state_id
-			gr_edge = pydot.Edge(ids[src], ids[dst])
-			#gr_edge.set_lhead(ids[dst_state_id])
-			#gr_edge.set_ltail(ids[src_state_id])
-			graph.add_edge(gr_edge)		
+		for chnode in node:
+# 			print "############ SUBPLAN FOUND #################" 
+			if "id" in node.attrib and "id" in chnode.attrib:
+				src_state_id = node.attrib["id"]
+				dst_state_id = chnode.attrib['id']
+				src = src_state_id
+				dst = dst_state_id
+	# 			print "{src} -> {dst}".format(src = ids[src], dst = ids[dst])
+				gr_edge = pydot.Edge(ids[src], ids[dst])
+				graph.add_edge(gr_edge)
+					
+# 		for chnode in node.findall('plan'):
+# # 			print "############ SUBTASK FOUND #################" 
+# 			src_state_id = node.attrib["id"]
+# 			dst_state_id = chnode.attrib['id']
+# 			src = src_state_id
+# 			dst = dst_state_id
+# 			print "{src} -> {dst}".format(src = ids[src], dst = ids[dst])
+# 			gr_edge = pydot.Edge(ids[src], ids[dst])
+# 			graph.add_edge(gr_edge)	
+			
 		for chnode in node:
 			graph_gen_edges(xml, chnode, graph, elem, ids, fsm)
-	if node.tag in ['state']:
+			
+	if node.tag in ['state', 'invoke']:
 		has_init_state = 'initialstate' in node.attrib
 		if has_init_state:
 			src_state_id = ids[node.attrib["id"]]+'start'
@@ -252,7 +290,7 @@ def graph_gen_edges(xml, node, graph, elem, ids, fsm=None):
 			else:
 				dst = find_simple_node(dst_state)
 				gr_edge = pydot.Edge(src_state_id, ids[dst])
-				if dst!=dst_state: gr_edge.set_lhead('cluster_'+ids[dst_state_id])
+				if dst!=dst_state_id: gr_edge.set_lhead('cluster_'+ids[dst_state_id])
 				#gr_edge.set_ltail(src_state_id)
 				gr_edge.set_fontsize("8")
 				graph.add_edge(gr_edge)	
@@ -282,10 +320,14 @@ def graph_gen_edges(xml, node, graph, elem, ids, fsm=None):
 			dst_state = chnode
 			dst = find_simple_node(dst_state)
 			gr_edge = pydot.Edge(ids[src], ids[dst])
+			
 			if dst!=dst_state_id: gr_edge.set_lhead('cluster_'+ids[dst_state_id])
+
+
 			#gr_edge.set_ltail(ids[src_state_id])
 			graph.add_edge(gr_edge)		
 			graph_gen_edges(xml, chnode, graph, elem, ids, fsm)
+			
 			
 			
 	#===========================================================================

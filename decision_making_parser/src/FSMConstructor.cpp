@@ -74,7 +74,7 @@ void xml_call_task(std::ostream& out, std::string tab, std::string name, std::st
 	string _id="";
 	if(id.size()>0) _id = " id=\""+id+"\"";
 	if(name.size()>0) _name = " name=\"TASK["+name+"]\"";
-	out<<tab<<"<state"<<_name<<_id<<" />";
+	out<<tab<<"<invoke"<<_name<<_id<<" />";
 }
 
 

@@ -241,7 +241,7 @@ public:
         Token token;
         stream >> token;
 
-        cout << translateToken(tokenType) << ": " << token.text << endl;
+//        cout << translateToken(tokenType) << ": " << token.text << endl;
 
         if (token.type != tokenType)
             throwException<UnexpectedToken>(token, token.text, translateToken(tokenType));
@@ -279,7 +279,7 @@ public:
             openingBracket = tkn.type;
             closingBracket = tkn_fclose;
         } else
-            throwException<UnexpectedToken>(tkn, tkn.text, "( or {");
+            throwException<UnexpectedToken>(tkn, tkn.text, "(' or '{");
 
 
         size_t foundIndex = findClosingBracket(stream, openingBracket, closingBracket);
@@ -506,29 +506,9 @@ public:
         skipTo(stream, tkn_tao_behs_bgn, true);
         parseTaoBehsBgn(stream);
 
-//        while (!stream.eof()) {
-//            Token tkn = stream.first();
-//
-//            switch(tkn.type) {
-//                case tkn_tao_behs:
-//                    parseTaoBehsDeclaration(stream);
-//                    break;
-//                case tkn_tao_start_beh:
-//                    parseTaoStartBeh(stream);
-//                    break;
-//                case tkn_tao_behs_bgn:
-//                    parseTaoBehsBgn(stream);
-//                    break;
-//                case tkn_fclose:
-//                    stream >> tkn;
-//                    return;
-//                default:
-//                    stream >> tkn;
-//                    break;
-//            }
-//        }
-
     }
+
+    string filename;
 
     void parse(tstream& stream) {
         try {
@@ -538,7 +518,7 @@ public:
 
         } catch (ParserException& e) {
             constructor.drop();
-//            cerr << e.what() << endl;
+            errors << "Exception occured in file '" << filename << "'" << endl;
             errors << e.what() << endl;
         }
     }
@@ -547,7 +527,7 @@ public:
     *** Initialization
     **************************************************************************************************/
 
-    string filename;
+
     std::string fullText;
     tstream tokens;
     TAOConstructor constructor;
@@ -597,15 +577,8 @@ public:
 
         if(true){
             while(not tokens.eof()){
-                try {
-
-                    if (skipTo(tokens, tkn_tao, false))
-                        parse(tokens);
-
-                } catch (PEFileNotCreated& ex) {
-//                    cerr << ex.what() << endl;
-                    errors << ex.what();
-                }
+                if (skipTo(tokens, tkn_tao, false))
+                    parse(tokens);
             }
 
             //PRINT(constructor);

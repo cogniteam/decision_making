@@ -111,11 +111,12 @@ class DotToQtGenerator():
         if 'width' in node.attr:
             bb_height = node.attr['height']
 
-        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width) - 1.0, POINTS_PER_INCH * float(bb_height) - 1.0)
-
         pos = (0, 0)
         if 'pos' in node.attr:
             pos = node.attr['pos'].split(',')
+
+        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width), POINTS_PER_INCH * float(bb_height))
+
         bounding_box.moveCenter(QPointF(float(pos[0]), -float(pos[1])))
 
         pen_width = self._factory.pen_width()
@@ -127,7 +128,7 @@ class DotToQtGenerator():
                                               shape=node.attr.get('shape', 'ellipse'),
                                               label=name,
                                               url=url,
-                                              pen_width=pen_width)
+                                              penwidth=pen_width)
         return node_item
 
     def add_edge_item_for_edge(self, edge, nodes, edges):

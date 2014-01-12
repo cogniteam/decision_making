@@ -41,6 +41,9 @@ public:
 	std::string what()const{ return description_;}
 
 	static int rerangeErrorCode(int code){ return error_start_code-1+code; }
+
+	const bool operator==(const TaskResult& o)const{ return error_ == o.error_; }
+	const bool operator!=(const TaskResult& o)const{ return error_ != o.error_; }
 };
 static std::ostream& operator<<(std::ostream& out, const TaskResult& res){
 	out<<"Result{";

@@ -16,6 +16,9 @@ using namespace decision_making;
 
 EventQueue mainEventQueue;
 
+#define CALL_REMOTE(NAME, CALLS, EVENTS) boost::bind(&callTask, #NAME, CALLS, EVENTS)
+
+#include "DecisionMaking.h"
 
 void callTask(std::string task_address, const CallContext& call_ctx, EventQueue& queue){
 	cout<<" TASK("<<task_address<<":CALL) ";
@@ -35,10 +38,8 @@ void callTask(std::string task_address, const CallContext& call_ctx, EventQueue&
 	}
 }
 
-#define CALL_REMOTE(NAME, CALLS, EVENTS) boost::bind(&callTask, #NAME, CALLS, EVENTS)
 
 
-#include "DecisionMaking.h"
 #define X(...) __VA_ARGS__
 
 

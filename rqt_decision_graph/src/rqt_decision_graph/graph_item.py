@@ -52,7 +52,7 @@ class GraphItem(QGraphicsItemGroup):
     def __init__(self, parent=None, **kwargs):
         super(GraphItem, self).__init__(parent)
 
-        self._pen_width = kwargs.get('pen_width', self.PEN_WIDTH)
+        self._pen_width = kwargs.get('penwidth', self.PEN_WIDTH)
         self._label_pen_width = kwargs.get('label_pen_width', self.LABEL_PEN_WIDTH)
         self._color = kwargs.get('color', self.COLOR)
 
