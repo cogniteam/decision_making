@@ -115,7 +115,7 @@ class DotToQtGenerator():
         if 'pos' in node.attr:
             pos = node.attr['pos'].split(',')
 
-        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width), POINTS_PER_INCH * float(bb_height))
+        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width) - 1.0, POINTS_PER_INCH * float(bb_height) - 1.0)
 
         bounding_box.moveCenter(QPointF(float(pos[0]), -float(pos[1])))
 
@@ -125,7 +125,7 @@ class DotToQtGenerator():
 
         url = node.attr['URL'] if 'URL' in node.attr else 'N/A'
         node_item = self._factory.create_node(bounding_box=bounding_box,
-                                              shape=node.attr.get('shape', 'ellipse'),
+                                              shape=node.attr.get('shape', 'box'),
                                               label=name,
                                               url=url,
                                               penwidth=pen_width)
@@ -228,7 +228,7 @@ class DotToQtGenerator():
         bb_width = node.attr['width']
         bb_height = node.attr['height']
 
-        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width), POINTS_PER_INCH * float(bb_height))
+        bounding_box = QRectF(0, 0, POINTS_PER_INCH * float(bb_width) - 1.0, POINTS_PER_INCH * float(bb_height) - 1.0)
         # print bounding_box
         pos = (0, 0)
         if 'pos' in node.attr:

@@ -304,7 +304,7 @@ class DotProcessor(object):
 
     def _create_digraph(self, graph, sub_graphs=True, translate_edge=False):
         digraph = Dot(graph_name=graph.get_name(), graph_type='digraph')
-
+        digraph.set_node_defaults(shape='box')
         label = None
         url = None
         for node in graph.get_node_list():

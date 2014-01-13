@@ -373,6 +373,7 @@ if __name__ == '__main__':
 				print fileXML, fileName,filetype
 			xml = ET.parse(fileXML).getroot()
 			graph = pydot.Dot(graph_type='digraph', compound='true')
+			graph.set_node_defaults(shape="box");
 			map_ids = map_all_ids(xml)
 			if options.verbose is ():
 				for k,v in map_ids.items(): print k,":",v

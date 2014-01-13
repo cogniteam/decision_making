@@ -72,7 +72,7 @@ class EdgeItem(GraphItem):
             self._label = QGraphicsSimpleTextItem(label)
 
             font = self._label.font()
-            font.setPointSize(5)
+            font.setPointSize(8)
             self._label.setFont(font)
 
             label_rect = self._label.boundingRect()

@@ -1914,7 +1914,7 @@ class Dot(Graph):
             f.write(f_data)
             f.close()
 
-        cmdline = [self.progs[prog], '-T' + format, tmp_name] + args
+        cmdline = [self.progs[prog], '-q1 -T' + format, tmp_name] + args
 
         p = subprocess.Popen(
             cmdline,
