@@ -248,7 +248,8 @@ std::string RosConstraints::preproc(std::string txt)const{
 
 TaskResult callTask(std::string task_address, const CallContext& gl_call_ctx, EventQueue& events){
 	DMDEBUG( cout<<" TASK("<<task_address<<":CALL) " ;)
-	CallContext call_ctx(gl_call_ctx, task_address);
+	//CallContext call_ctx(gl_call_ctx, task_address);
+	const CallContext& call_ctx = gl_call_ctx;
 	RosDiagnostic::get().publish(call_ctx.str(), "TASK", "started", str(decision_making::TaskResult::UNDEF()));
 
 	string task_name, task_params;
@@ -260,6 +261,9 @@ TaskResult callTask(std::string task_address, const CallContext& gl_call_ctx, Ev
 	if(LocalTasks::registrated(task_name)){
 		TaskResult res = LocalTasks::call(task_name, task_address, call_ctx, events);
 		RosDiagnostic::get().publish(call_ctx.str(), "TASK", "stopped", str(res));
+		Event new_event ( Event(""+ MapResultEvent::map(task_name, res.error()), call_ctx) );
+		DMDEBUG( cout<<" TASK("<<task_address<<":"<<new_event<<") "; )
+		events.raiseEvent(new_event);
 		return res;
 	}
 

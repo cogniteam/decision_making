@@ -51,6 +51,7 @@ class Graph(object):
         self.source = source
 
     def load(self):
+        print 'Reading dot data from', self.source
         self._create_dot_from_file(self.source)
 
     def _create_dot_from_file(self, dot_file_path):

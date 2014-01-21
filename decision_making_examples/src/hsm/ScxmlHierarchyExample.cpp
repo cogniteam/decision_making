@@ -28,18 +28,18 @@ FSM(Superstate)
 		{
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(/begin, FSM_NEXT(Process));
-				FSM_ON_EVENT(/end, FSM_RISE(Start/end));
-				FSM_ON_EVENT(/data, FSM_RISE(Start/data));
+				FSM_ON_EVENT("/begin", FSM_NEXT(Process));
+				FSM_ON_EVENT("/end", FSM_RISE("Start/end"));
+				FSM_ON_EVENT("/data", FSM_RISE("Start/data"));
 			}
 		}
 		FSM_STATE(Process)
 		{
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(/data, FSM_NEXT(Process));
-				FSM_ON_EVENT(/end, FSM_RISE(Process/end));
-				FSM_ON_EVENT(/data, FSM_RISE(Process/data));
+				FSM_ON_EVENT("/data", FSM_NEXT(Process));
+				FSM_ON_EVENT("/end", FSM_RISE("Process/end"));
+				FSM_ON_EVENT("/data", FSM_RISE("Process/data"));
 			}
 		}
 	}
@@ -68,12 +68,12 @@ FSM(ScxmlHierarchyExample)
 			FSM_CALL_FSM(Superstate);
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(/error, FSM_NEXT(Error));
-				FSM_ON_EVENT(Superstate/error, FSM_NEXT(Error));
-				FSM_ON_EVENT(Superstate/Start/end, FSM_NEXT(Error));
-				FSM_ON_EVENT(Superstate/Start/data, FSM_NEXT(Error));
-				FSM_ON_EVENT(Superstate/Process/begin, FSM_NEXT(Error));
-				FSM_ON_EVENT(Superstate/Process/end, FSM_NEXT(Success));
+				FSM_ON_EVENT("/error", FSM_NEXT(Error));
+				FSM_ON_EVENT("Superstate/error", FSM_NEXT(Error));
+				FSM_ON_EVENT("Superstate/Start/end", FSM_NEXT(Error));
+				FSM_ON_EVENT("Superstate/Start/data", FSM_NEXT(Error));
+				FSM_ON_EVENT("Superstate/Process/begin", FSM_NEXT(Error));
+				FSM_ON_EVENT("Superstate/Process/end", FSM_NEXT(Success));
 			}
 		}
 

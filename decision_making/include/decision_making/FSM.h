@@ -64,10 +64,10 @@ struct ScoppedThreads{
 class ScoppedThreadsOnExit:public ___ABS__ScoppedThreadsOnExit{
 public:
 	EventQueue* events_queue;
-	CallContext& call_ctx;
+	CallContext& state_call_ctx;
 	ScoppedThreads SUBMACHINESTHREADS;
 	ScoppedThreadsOnExit(CallContext& call_ctx, EventQueue* events_queue):
-		events_queue(events_queue), call_ctx(call_ctx)
+		events_queue(events_queue), state_call_ctx(call_ctx)
 	{}
 	virtual ~ScoppedThreadsOnExit(){}
 	//virtual void exit()=0;
@@ -134,21 +134,21 @@ public:
 				state = STATE; \
 				break;
 #define FSM_ON_EVENT(EVENT, DO) \
-			if(event==decision_making::Event(#EVENT,call_ctx)){ \
-				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(#EVENT,call_ctx)<< "->" #DO ") "; ) \
+			if(event==decision_making::Event(EVENT,state_call_ctx)){ \
+				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(EVENT,call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
-#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,call_ctx))
+#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,state_call_ctx))
 
 #define FSM_ON_CONDITION(COND, DO) \
 			if(COND){ \
-				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(#COND,call_ctx)<< "->" #DO ") "; ) \
+				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(#COND,state_call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
 
 #define FSM_RAISE(EVENT) \
-			DMDEBUG( cout<<" RAISE("<<fsm_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
-			events_queue->raiseEvent(decision_making::Event(#EVENT, call_ctx));
+			DMDEBUG( cout<<" RAISE("<<fsm_name<<":"<<decision_making::Event(EVENT, state_call_ctx)<<") "; ) \
+			events_queue->raiseEvent(decision_making::Event(EVENT, state_call_ctx));
 
 //Deprecated
 #define FSM_RISE(EVENT) FSM_RAISE(EVENT)
@@ -156,7 +156,7 @@ public:
 #define FSM_EVENTS_DROP events_queue->drop_all();
 
 #define __DEFSUBEVENTQUEUE(TASK) decision_making::ScoppedThreads::EventQueuePtr events_queu##TASK( new decision_making::EventQueue(events_queue) );
-#define __DEFSUBCTEXT(TASK) decision_making::ScoppedThreads::CallContextPtr call_ctx##TASK( new decision_making::CallContext(call_ctx, #TASK) );
+#define __DEFSUBCTEXT(TASK) decision_making::ScoppedThreads::CallContextPtr call_ctx##TASK( new decision_making::CallContext(state_call_ctx, #TASK) );
 #define __SHR_TO_REF(X) (*(X.get()))
 #define FSM_CALL_TASK(TASK) \
 			__DEFSUBEVENTQUEUE(TASK) __DEFSUBCTEXT(TASK) \
@@ -169,7 +169,7 @@ public:
 			__DEFSUBEVENTQUEUE(NAME) \
 			SUBMACHINESTHREADS.add(events_queu##NAME); \
 			SUBMACHINESTHREADS.add(\
-					new boost::thread(boost::bind(&Fsm##NAME, &call_ctx, events_queu##NAME.get())  ));
+					new boost::thread(boost::bind(&Fsm##NAME, &state_call_ctx, events_queu##NAME.get())  ));
 
 
 #define FSM_CALL_BT(NAME) \
@@ -185,14 +185,16 @@ public:
 
 #define FSM_ON_STATE_EXIT_BGN \
 			class __ON_STATE_EXIT_STRUCT:public decision_making::ScoppedThreadsOnExit{public:\
-				__ON_STATE_EXIT_STRUCT(CallContext& call_ctx, EventQueue* events_queue):decision_making::ScoppedThreadsOnExit(call_ctx, events_queue){}\
+				__ON_STATE_EXIT_STRUCT(CallContext& state_call_ctx, EventQueue* events_queue):decision_making::ScoppedThreadsOnExit(state_call_ctx, events_queue){}\
 				virtual void exit(){
 
 #define FSM_ON_STATE_EXIT_END \
 				}\
 			};\
-			decision_making::ScoppedThreadsOnExit* __tmp___ON_STATE_EXIT_STRUCT = new __ON_STATE_EXIT_STRUCT(call_ctx, events_queue);\
+			decision_making::ScoppedThreadsOnExit* __tmp___ON_STATE_EXIT_STRUCT = new __ON_STATE_EXIT_STRUCT(state_call_ctx, events_queue);\
 			SUBMACHINESTHREADS.add(decision_making::ScoppedThreads::ScoppedThreadsOnExitPtr(__tmp___ON_STATE_EXIT_STRUCT));
+
+#define FSM_ON_STATE_EXIT(...) } __VA_ARGS__ {
 
 #define FSM_STOP(EVENT, RESULT) \
 			fsm_stop=true; \

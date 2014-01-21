@@ -260,8 +260,8 @@ public:
 				state = STATE; \
 				break;
 #define TAO_ON_EVENT(EVENT, DO) \
-			if(event==decision_making::Event(#EVENT,plan_call_ctx)){ \
-				DMDEBUG( cout<<" GOTO("<<tao_name<<":"<<decision_making::Event(#EVENT,plan_call_ctx)<< "->" #DO ") "; ) \
+			if(event==decision_making::Event(EVENT,plan_call_ctx)){ \
+				DMDEBUG( cout<<" GOTO("<<tao_name<<":"<<decision_making::Event(EVENT,plan_call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
 #define TAO_EVENT(EVENT) decision_making::Event(#EVENT,plan_call_ctx)
@@ -273,8 +273,8 @@ public:
 			}
 
 #define TAO_RAISE(EVENT) \
-			DMDEBUG( cout<<" RAISE("<<tao_name<<":"<<decision_making::Event(#EVENT, plan_call_ctx)<<") "; ) \
-			events_queue->raiseEvent(decision_making::Event(#EVENT, plan_call_ctx));
+			DMDEBUG( cout<<" RAISE("<<tao_name<<":"<<decision_making::Event(EVENT, plan_call_ctx)<<") "; ) \
+			events_queue->raiseEvent(decision_making::Event(EVENT, plan_call_ctx));
 
 //Deprecated
 #define TAO_RISE(EVENT) TAO_RAISE(EVENT)

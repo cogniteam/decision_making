@@ -290,8 +290,8 @@ typedef BTNode CurrentNodeType;
 					__BT_END_TASK(NAME)
 
 #define BT_RAISE(EVENT) \
-			DMDEBUG( cout<<" RAISE("<<node_name<<":"<<decision_making::Event(#EVENT, call_ctx)<<") "; ) \
-			events.raiseEvent(decision_making::Event(#EVENT, call_ctx));
+			DMDEBUG( cout<<" RAISE("<<node_name<<":"<<decision_making::Event(EVENT, call_ctx)<<") "; ) \
+			events.raiseEvent(decision_making::Event(EVENT, call_ctx));
 
 //Deprecated
 #define BT_RISE(EVENT) BT_RAISE(EVENT)

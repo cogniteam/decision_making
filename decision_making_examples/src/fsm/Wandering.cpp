@@ -74,8 +74,8 @@ FSM(Wandering)
 
             FSM_TRANSITIONS
             {
-                FSM_ON_EVENT(/TURN_TIMEOUT, FSM_NEXT(Drive))
-                FSM_ON_EVENT(/PAUSE, FSM_NEXT(Pause))
+                FSM_ON_EVENT("/TURN_TIMEOUT", FSM_NEXT(Drive))
+                FSM_ON_EVENT("/PAUSE", FSM_NEXT(Pause))
             }
         }
         FSM_STATE(Drive)
@@ -84,9 +84,9 @@ FSM(Wandering)
 
             FSM_TRANSITIONS
             {
-                FSM_ON_EVENT(/DRIVE_TIMEOUT, FSM_NEXT(Turn))
-                FSM_ON_EVENT(/OBSTACLE, FSM_NEXT(Turn))
-                FSM_ON_EVENT(/PAUSE, FSM_NEXT(Pause))
+                FSM_ON_EVENT("/DRIVE_TIMEOUT", FSM_NEXT(Turn))
+                FSM_ON_EVENT("/OBSTACLE", FSM_NEXT(Turn))
+                FSM_ON_EVENT("/PAUSE", FSM_NEXT(Pause))
             }
         }
         FSM_STATE(Pause)
@@ -95,7 +95,7 @@ FSM(Wandering)
 
             FSM_TRANSITIONS
             {
-                FSM_ON_EVENT(/RESUME, FSM_NEXT(Turn))
+                FSM_ON_EVENT("/RESUME", FSM_NEXT(Turn))
             }
         }
     }

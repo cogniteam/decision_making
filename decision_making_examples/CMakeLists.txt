@@ -31,6 +31,7 @@ add_executable(hsm_ex src/hsm/ScxmlHierarchyExample.cpp)
 #add_executable(bt_ex src/bt/Example1.cpp)
 add_executable(tao_ex src/tao/TaoExample.cpp)
 add_executable(tao_increment src/tao/TaoIncrement.cpp)
+add_executable(hsm_mission src/hsm/Mission.cpp)
  
 target_link_libraries(fsm_roomba ${catkin_LIBRARIES})
 target_link_libraries(fsm_roomba_events ${catkin_LIBRARIES})
@@ -42,7 +43,9 @@ target_link_libraries(hsm_ex ${catkin_LIBRARIES})
 #target_link_libraries(bt_ex ${catkin_LIBRARIES})
 target_link_libraries(tao_ex ${catkin_LIBRARIES})
 target_link_libraries(tao_increment ${catkin_LIBRARIES})
- 
+target_link_libraries(hsm_mission ${catkin_LIBRARIES}) 
+
+
 decision_making_parsing(
 	src/fsm/Roomba.cpp
 	src/fsm/Turnstile.cpp
@@ -51,6 +54,7 @@ decision_making_parsing(
 #	src/bt/Example1.cpp
 	src/tao/TaoExample.cpp
 	src/tao/TaoIncrement.cpp
+	src/hsm/Mission.cpp
 )
 
 #############

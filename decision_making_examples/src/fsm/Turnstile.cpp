@@ -26,16 +26,16 @@ FSM(Turnstile)
 		{
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(/COIN, FSM_NEXT(Unlocked));
-				FSM_ON_EVENT(/PUSH, FSM_NEXT(Locked));
+				FSM_ON_EVENT("/COIN", FSM_NEXT(Unlocked));
+				FSM_ON_EVENT("/PUSH", FSM_NEXT(Locked));
 			}
 		}
 		FSM_STATE(Unlocked)
 		{
 			FSM_TRANSITIONS
 			{
-				FSM_ON_EVENT(/COIN, FSM_NEXT(Unlocked));
-				FSM_ON_EVENT(/PUSH, FSM_NEXT(Locked));
+				FSM_ON_EVENT("/COIN", FSM_NEXT(Unlocked));
+				FSM_ON_EVENT("/PUSH", FSM_NEXT(Locked));
 			}
 		}
 	}

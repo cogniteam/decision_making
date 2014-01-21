@@ -49,7 +49,8 @@ public:
 			std::string task_name,
 			std::string task_address,
 			const decision_making::CallContext& call_ctx,
-			decision_making::EventQueue& events){
+			decision_making::EventQueue& events
+	){
 		if(get().find(task_name)!=get().end())
 			return get()[task_name](task_address, call_ctx, events);
 		if(get_fun().find(task_name)!=get_fun().end())

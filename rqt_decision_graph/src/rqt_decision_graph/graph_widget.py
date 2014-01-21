@@ -150,6 +150,7 @@ class GraphWidget(QWidget):
                                        data['node_run_id'],
                                        data['node_name'],
                                        data['node_exe_file'],
+                                       data['node_exe_dir'],
                                        self._dot_processor,
                                        key)
 
