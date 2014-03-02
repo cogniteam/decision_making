@@ -76,7 +76,7 @@ class GraphWidget(QWidget):
         self.open_button.pressed.connect(self._import)
         self.export_button.setIcon(QIcon.fromTheme('document-export'))
         self.export_button.pressed.connect(self._export)
-        self.fit_to_view_button.setIcon(QIcon.fromTheme('zoom-original'))
+        self.fit_to_view_button.setIcon(QIcon.fromTheme('zoom-fit-best'))
         self.fit_to_view_button.pressed.connect(self._fit_to_view)
 
         self.decision_graphs_combo_box.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLength)
@@ -170,9 +170,13 @@ class GraphWidget(QWidget):
         is_updated = False
         if self._current_graph is not None:
             for node in self._current_graph.nodes.values():
-                if name[:len(node.url)] == node.url:
-                    node.highlight(True) if 'started' == status else node.highlight(False)
+                if 'started' == status and name[:len(node.url)] == node.url:
+                    node.highlight(True)
                     is_updated = True
+                elif 'stopped' == status and name == node.url:
+                    node.highlight(False)
+                    is_updated = True
+
         self._lock.release()
 
         return is_updated

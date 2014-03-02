@@ -164,10 +164,13 @@ class DotProcessor(object):
         graphs.append(graph.get_name())
 
         for sub_graph in graph.get_subgraph_list():
-            if sub_graph.get_name() is '':
+            if not sub_graph.get_name():
                 continue
 
-            digraph, digraph_dot = self._create_digraph(sub_graph)
+            digraph, digraph_dot, self_edge = self._create_digraph(sub_graph)
+
+            if self_edge:
+                graph.add_edge(self_edge)
 
             bounding_box = self._map_dot_graph(digraph_dot, graphs, graphs_nodes_and_edges, cluster_nodes)
             width, height = self._calculate_size(bounding_box)
@@ -184,16 +187,18 @@ class DotProcessor(object):
         if self._has_html_nodes(graph):
             graph = self._adjust_html_nodes_size(graph)
 
-        processed_graph, processed_graph_dot = self._create_digraph(graph, sub_graphs=False, translate_edge=True)
+        processed_graph, processed_graph_dot, _ = self._create_digraph(graph,
+                                                                       sub_graphs=False,
+                                                                       translate_edge=True)
 
-        self._map_graph_to_nodes_and_edges(graphs_nodes_and_edges,
+        self._map_nodes_and_edges_to_graph(graphs_nodes_and_edges,
                                            processed_graph,
                                            processed_graph.get_node_list(),
                                            processed_graph.get_edge_list())
 
         return processed_graph.get_bb()
 
-    def _map_graph_to_nodes_and_edges(self, graphs_nodes_and_edges, graph, nodes, edges, include_nameless=True):
+    def _map_nodes_and_edges_to_graph(self, graphs_nodes_and_edges, graph, nodes, edges, include_nameless=True):
         if graph.get_name() not in graphs_nodes_and_edges:
             graphs_nodes_and_edges[graph.get_name()] = ([], [])
 
@@ -214,10 +219,10 @@ class DotProcessor(object):
             return
 
         for sub_graph in graph.get_subgraph_list():
-            if not sub_graph.get_name() == '':
+            if sub_graph.get_name():
                 continue
 
-            self._map_graph_to_nodes_and_edges(graphs_nodes_and_edges,
+            self._map_nodes_and_edges_to_graph(graphs_nodes_and_edges,
                                                graph,
                                                sub_graph.get_node_list(),
                                                sub_graph.get_edge_list(),
@@ -235,7 +240,7 @@ class DotProcessor(object):
 
         label = node.get_label()
 
-        if label is None:
+        if not label:
             return False
 
         label = label.strip('\"')
@@ -262,7 +267,7 @@ class DotProcessor(object):
 
         label = node.get_label()
 
-        if label is None:
+        if not label:
             return node
 
         label = label.strip('\"')
@@ -302,7 +307,27 @@ class DotProcessor(object):
 
         return graph_from_dot_data(digraph.create_dot())
 
+    def _translate_edge_source(self, edge):
+        source = edge.get_ltail()
+
+        if not source:
+            source = edge.get_source()
+
+        return source
+
+    def _translate_edge_destination(self, edge):
+        destination = edge.get_lhead()
+
+        if not destination:
+            destination = edge.get_destination()
+
+        return destination
+
+    def _is_parent_graph_node(self, source, destination, parent_name):
+        return source == destination and destination == parent_name
+
     def _create_digraph(self, graph, sub_graphs=True, translate_edge=False):
+        parent_edge = None
         digraph = Dot(graph_name=graph.get_name(), graph_type='digraph')
         digraph.set_node_defaults(shape='box')
         label = None
@@ -317,36 +342,40 @@ class DotProcessor(object):
                 digraph.add_node(node)
 
         for edge in graph.get_edge_list():
+            source = self._translate_edge_source(edge)
+            destination = self._translate_edge_destination(edge)
+            edge_label = edge.get_label()
+
             if translate_edge:
-                source = edge.get_ltail()
-                if not source:
-                    source = edge.get_source()
+                if self._is_parent_graph_node(source, destination, graph.get_name()):
+                    continue
 
-                destination = edge.get_lhead()
-                if not destination:
-                    destination = edge.get_destination()
+                translated_edge = Edge(source, destination)
+                if edge_label:
+                    translated_edge.set_label(edge_label)
 
-                edge_label = edge.get_label()
-                if not edge_label:
-                    digraph.add_edge(Edge(source, destination))
-                else:
-                    digraph.add_edge(Edge(source, destination, label=edge_label))
+                digraph.add_edge(translated_edge)
 
             else:
+                if self._is_parent_graph_node(source, destination, graph.get_name()):
+                    parent_edge = Edge(source, destination)
+                    if edge_label:
+                        parent_edge.set_label(edge_label)
+                    continue
                 digraph.add_edge(edge)
 
         for sub_graph in graph.get_subgraph_list():
             if sub_graphs or sub_graph.get_name() == '':
                 digraph.add_subgraph(sub_graph)
 
-        if label is not None:
+        if label:
             digraph.set_label(label)
             digraph.set_labelloc('t')
 
-        if url is not None:
+        if url:
             digraph.set_URL(url)
 
         digraph_dot = digraph.create_dot()
 
-        return graph_from_dot_data(digraph_dot), digraph_dot
+        return graph_from_dot_data(digraph_dot), digraph_dot, parent_edge
 

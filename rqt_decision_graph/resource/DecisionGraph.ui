@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>744</width>
+    <width>867</width>
     <height>523</height>
    </rect>
   </property>
@@ -32,79 +32,7 @@
    <enum>Qt::LeftToRight</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="8">
-    <widget class="QPushButton" name="fit_to_view_button">
-     <property name="minimumSize">
-      <size>
-       <width>36</width>
-       <height>36</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>36</width>
-       <height>36</height>
-      </size>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset theme="zoom-original">
-       <normaloff/>
-      </iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="7">
-    <widget class="QPushButton" name="export_button">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>36</width>
-       <height>36</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>36</width>
-       <height>36</height>
-      </size>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset theme="document-export">
-       <normaloff/>
-      </iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-     <property name="default">
-      <bool>false</bool>
-     </property>
-     <property name="flat">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="6">
     <widget class="QPushButton" name="open_button">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -149,20 +77,79 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="5">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="0" column="8">
+    <widget class="QPushButton" name="export_button">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="sizeHint" stdset="0">
+     <property name="minimumSize">
       <size>
-       <width>433</width>
-       <height>22</height>
+       <width>36</width>
+       <height>36</height>
       </size>
      </property>
-    </spacer>
+     <property name="maximumSize">
+      <size>
+       <width>36</width>
+       <height>36</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset theme="document-export">
+       <normaloff/>
+      </iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
-   <item row="1" column="0" colspan="9">
+   <item row="0" column="9">
+    <widget class="QPushButton" name="fit_to_view_button">
+     <property name="minimumSize">
+      <size>
+       <width>36</width>
+       <height>36</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>36</width>
+       <height>36</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset theme="zoom-fit-best">
+       <normaloff/>
+      </iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="10">
     <widget class="InteractiveGraphicsView" name="graphics_view">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -200,11 +187,11 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="3" colspan="2">
+   <item row="0" column="3" colspan="3">
     <widget class="QComboBox" name="decision_graphs_combo_box">
      <property name="minimumSize">
       <size>
-       <width>300</width>
+       <width>450</width>
        <height>36</height>
       </size>
      </property>
@@ -224,6 +211,19 @@
       <number>10</number>
      </property>
     </widget>
+   </item>
+   <item row="0" column="6">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>350</width>
+       <height>22</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
