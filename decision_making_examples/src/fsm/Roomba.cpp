@@ -106,6 +106,7 @@ int main(int argc, char** argv){
 	/**
 	 * Blocking call
 	 */
+  mainEventQueue->async_spin();
 	FsmRoomba(NULL, mainEventQueue);
 
 	spinner.stop();
