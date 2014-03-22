@@ -1,4 +1,3 @@
-
 #include <iostream>
 
 #include <decision_making/SynchCout.h>
@@ -106,9 +105,10 @@ int main(int argc, char** argv){
 	/**
 	 * Blocking call
 	 */
-  mainEventQueue->async_spin();
+	mainEventQueue->async_spin();
 	FsmRoomba(NULL, mainEventQueue);
-
+	mainEventQueue->close();
+	
 	spinner.stop();
 	ROS_INFO("Roomba done");
 
