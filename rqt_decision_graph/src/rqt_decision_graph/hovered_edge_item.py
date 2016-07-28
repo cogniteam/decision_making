@@ -33,8 +33,8 @@ Note: This is modified version by Cogniteam
 """
 
 from python_qt_binding.QtCore import Qt, QPointF
-from python_qt_binding.QtGui import QBrush, QGraphicsSimpleTextItem, QPen, QColor, QPainterPath, QGraphicsPolygonItem, \
-                                    QPolygonF, QPainterPath, QGraphicsPathItem
+from python_qt_binding.QtGui import QBrush, QPen, QColor, QPainterPath, QPolygonF, QPainterPath
+from python_qt_binding.QtWidgets import QGraphicsPolygonItem, QGraphicsPathItem, QGraphicsSimpleTextItem
 from .edge_item import EdgeItem
 
 

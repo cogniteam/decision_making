@@ -33,7 +33,8 @@ Note: This is modified version by CogniTeam
 """
 
 from python_qt_binding.QtCore import Qt
-from python_qt_binding.QtGui import QBrush, QGraphicsSimpleTextItem, QPen, QPainterPath, QColor
+from python_qt_binding.QtGui import QBrush, QPen, QPainterPath, QColor
+from python_qt_binding.QtWidgets import QGraphicsSimpleTextItem
 from .node_item import NodeItem
 
 

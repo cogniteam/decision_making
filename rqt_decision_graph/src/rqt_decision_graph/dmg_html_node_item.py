@@ -29,7 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from python_qt_binding.QtCore import Qt
-from python_qt_binding.QtGui import QBrush, QGraphicsTextItem, QPen, QPainterPath, QColor
+from python_qt_binding.QtGui import QBrush, QPen, QPainterPath, QColor
+from python_qt_binding.QtWidgets import QGraphicsTextItem
 from .graph_item import GraphItem
 from .shape_factory import ShapeFactory
 

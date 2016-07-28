@@ -28,7 +28,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from python_qt_binding.QtGui import QWidget
+from python_qt_binding.QtWidgets import QWidget
 import rospkg
 import rospy
 from diagnostic_msgs.msg import DiagnosticArray

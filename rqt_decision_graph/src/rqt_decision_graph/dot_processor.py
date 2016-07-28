@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from __future__ import division
-from python_qt_binding.QtGui import QGraphicsTextItem
+from python_qt_binding.QtWidgets import QGraphicsTextItem
 from pydot import *
 
 POINTS_PER_INCH = 72

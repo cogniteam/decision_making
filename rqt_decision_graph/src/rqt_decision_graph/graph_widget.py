@@ -33,7 +33,8 @@ from os import path
 from threading import Lock
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt
-from python_qt_binding.QtGui import QFileDialog, QGraphicsScene, QIcon, QImage, QPainter, QWidget, QColor, QComboBox
+from python_qt_binding.QtGui import QIcon, QImage, QPainter, QColor
+from python_qt_binding.QtWidgets import QFileDialog, QGraphicsScene, QWidget, QComboBox
 from collections import namedtuple
 from .interactive_graphics_view import InteractiveGraphicsView
 from .decision_graph import DecisionGraph

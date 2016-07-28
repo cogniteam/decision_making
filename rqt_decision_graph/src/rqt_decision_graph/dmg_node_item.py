@@ -29,7 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from python_qt_binding.QtCore import Qt
-from python_qt_binding.QtGui import QBrush, QGraphicsSimpleTextItem, QPen, QColor
+from python_qt_binding.QtGui import QBrush, QPen, QColor
+from python_qt_binding.QtWidgets import QGraphicsSimpleTextItem
 from .hovered_node_item import HoveredNodeItem
 
 
