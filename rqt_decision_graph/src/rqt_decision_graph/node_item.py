@@ -33,7 +33,8 @@ Note: This is modified version by Cogniteam
 """
 
 from python_qt_binding.QtCore import Qt
-from python_qt_binding.QtGui import QBrush, QGraphicsSimpleTextItem, QPen
+from python_qt_binding.QtGui import QBrush, QPen
+from python_qt_binding.QtWidgets import QGraphicsSimpleTextItem
 
 from .graph_item import GraphItem
 from .shape_factory import ShapeFactory

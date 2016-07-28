@@ -32,7 +32,8 @@ POSSIBILITY OF SUCH DAMAGE.
 Note: This is modified version by Cogniteam
 """
 
-from python_qt_binding.QtGui import QGraphicsItemGroup, QColor
+from python_qt_binding.QtGui import QColor
+from python_qt_binding.QtWidgets import QGraphicsItemGroup
 
 
 class GraphItem(QGraphicsItemGroup):

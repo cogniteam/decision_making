@@ -31,8 +31,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from __future__ import division
 
 from python_qt_binding.QtCore import Qt, QPointF
-from python_qt_binding.QtGui import QBrush, QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsSimpleTextItem, \
-                                    QPainterPath, QPen, QGraphicsPolygonItem, QPolygonF
+from python_qt_binding.QtGui import QBrush, QPainterPath, QPen, QPolygonF
+from python_qt_binding.QtWidgets import QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsSimpleTextItem,\
+                                        QGraphicsPolygonItem
 
 
 class StaticClassError(Exception):
