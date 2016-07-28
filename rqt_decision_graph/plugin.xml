@@ -1,4 +1,4 @@
-<library path="src">
+<library path="src/rqt_decision_graph">
   <class name="DecisionMakingGraph" type="rqt_decision_graph.decision_making_graph.DecisionMakingGraph" base_class_type="rqt_gui_py::Plugin">
     <description>
       Decision graph visualizer
