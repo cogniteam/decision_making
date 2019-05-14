@@ -74,6 +74,7 @@ public:
 	virtual boost::thread_group& getThreads(){ return SUBMACHINESTHREADS.threads; }
 };
 
+}
 
 #define FSM_HEADER(NAME) \
 	decision_making::TaskResult Fsm##NAME(const decision_making::CallContext*, decision_making::EventQueue*, std::string);\
@@ -138,7 +139,7 @@ public:
 				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(EVENT,call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
-#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,state_call_ctx))
+#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,state_call_ctx)
 
 #define FSM_ON_CONDITION(COND, DO) \
 			if(COND){ \
@@ -185,7 +186,7 @@ public:
 
 #define FSM_ON_STATE_EXIT_BGN \
 			class __ON_STATE_EXIT_STRUCT:public decision_making::ScoppedThreadsOnExit{public:\
-				__ON_STATE_EXIT_STRUCT(CallContext& state_call_ctx, EventQueue* events_queue):decision_making::ScoppedThreadsOnExit(state_call_ctx, events_queue){}\
+				__ON_STATE_EXIT_STRUCT(decision_making::CallContext& state_call_ctx, decision_making::EventQueue* events_queue):decision_making::ScoppedThreadsOnExit(state_call_ctx, events_queue){}\
 				virtual void exit(){
 
 #define FSM_ON_STATE_EXIT_END \
@@ -203,13 +204,11 @@ public:
 			break;
 
 #define __CLEAN_THREAD_AND_EVENTS decision_making::ScoppedThreads::Cleaner SUBMACHINESTHREADSCLEANER(SUBMACHINESTHREADS);
-#define FSM_TRANSITIONS  __CLEAN_THREAD_AND_EVENTS {Event event; while((event=events_queue->waitEvent())==true){
+#define FSM_TRANSITIONS  __CLEAN_THREAD_AND_EVENTS {decision_making::Event event; while((event=events_queue->waitEvent())==true){
 
 #define FSM_DROP_EVENTS events_queue->drop_all();
 
 #define FSM_PRINT_EVENT if(not event.equals(decision_making::Event::SPIN_EVENT())){ cout<<" READ("<<fsm_name<<":"<<event<<") "; }
-
-}
 
 
 #endif /* FSM_H_ */
