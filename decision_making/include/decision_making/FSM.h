@@ -138,7 +138,7 @@ public:
 				DMDEBUG( cout<<" GOTO("<<fsm_name<<":"<<decision_making::Event(EVENT,call_ctx)<< "->" #DO ") "; ) \
 				DO;\
 			}
-#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,state_call_ctx))
+#define FSM_EVENT(EVENT) decision_making::Event(#EVENT,state_call_ctx)
 
 #define FSM_ON_CONDITION(COND, DO) \
 			if(COND){ \
